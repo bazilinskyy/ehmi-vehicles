@@ -1,0 +1,617 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Experiment page</title>
+    <!-- jquery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <!-- jspsych -->
+    <script src="jspsych/jspsych.js"></script>
+    <link href="jspsych/jspsych.css" rel="stylesheet" type="text/css" />
+    <script src="jspsych/plugin-fullscreen.js"></script>
+    <script src="jspsych/plugin-html-keyboard-response.js"></script>
+    <script src="jspsych/plugin-instructions.js"></script>
+    <script src="jspsych/plugin-call-function.js"></script>
+    <script src="jspsych/plugin-survey-html-form-slider.js"></script>
+    <script src="jspsych/plugin-html-slider-response.js"></script>
+    <script src="jspsych/plugin-preload.js"></script>
+    <script src="jspsych/plugin-image-keyboard-response.js"></script>
+    <script src="jspsych/plugin-survey-likert.js"></script>
+    <script src="jspsych/plugin-survey-multi-choice.js"></script>
+    <!-- jspsych version of webgazer -->
+    <script src="jspsych/webgazer/webgazer.js"></script>
+    <script src="jspsych/extension-webgazer.js"></script>
+    <script src="jspsych/plugin-webgazer-init-camera.js"></script>
+    <script src="jspsych/plugin-webgazer-calibrate.js"></script>
+    <script src="jspsych/plugin-webgazer-validate.js"></script>
+    <!-- bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+    <!-- custom css -->
+    <link href="css/experiment.css" rel='stylesheet' type='text/css'></link>
+    <!-- favicon -->
+    <link rel='icon' type='image/png' href='img/favicon.png' />
+  </head>
+  <body>
+  </body>
+  <script>
+
+// by Pavlo Bazilinskyy <p.bazilinskyy@tue.nl>
+
+// Constants
+var n_images = 41; // number of images
+var n_images_per_participant = 41; // number of images per participant
+var n_images_repeat = 1; // number of repeats of each condition
+var trial_duration = 10000; // amount of ms for showing an image stimulus
+var image_pfefix = 'img/'; // prefix for images
+var simulus_pfefix = 'img/stimuli/image_'; // prefix for videos
+var SHOW_DEBUG = false; // switch for debugging output
+var SAVE_DATA = true; // save data or not
+var EYE_TRACKING = true; // use eye_tracking or not
+var CALIBRATION_NUM = 2; // how many times to calibrate eye tracking
+// Constants for attention checks
+var MAX_WRONG_ANSWERS = 2;      // allowed incorrect answers
+var MAX_WRONG_THRESHOLD = 3;    // disqualify on this many mistakes (MAX_WRONG_ANSWERS + 1)
+
+// Arrays
+var image_ids = []; // ids of stimuli
+var interactions = [];  // recorded browser interactions
+var image_stimuli = []; // blocks with jsPsych stimuli pages
+
+// browser info
+// https://stackoverflow.com/questions/11219582/how-to-detect-my-browser-version-and-operating-system-using-javascript
+var nVer = navigator.appVersion;
+var nAgt = navigator.userAgent;
+var br_name = navigator.appName;
+var br_full_version = '' + parseFloat(navigator.appVersion);
+var br_major_version = parseInt(navigator.appVersion, 10);
+var window_width = $(window).width();
+var window_height = $(window).height();
+var nameOffset, verOffset, ix;
+
+// In Opera, the true version is after "Opera" or after "Version"
+if ((verOffset = nAgt.indexOf("Opera")) != -1) {
+    br_name = "Opera";
+    br_full_version = nAgt.substring(verOffset + 6);
+    if ((verOffset = nAgt.indexOf("Version")) != -1)
+        br_full_version = nAgt.substring(verOffset + 8);
+}
+// In MSIE, the true version is after "MSIE" in userAgent
+else if ((verOffset = nAgt.indexOf("MSIE")) != -1) {
+    br_name = "Microsoft Internet Explorer";
+    br_full_version = nAgt.substring(verOffset + 5);
+}
+// In Chrome, the true version is after "Chrome" 
+else if ((verOffset = nAgt.indexOf("Chrome")) != -1) {
+    br_name = "Chrome";
+    br_full_version = nAgt.substring(verOffset + 7);
+}
+// In Safari, the true version is after "Safari" or after "Version" 
+else if ((verOffset = nAgt.indexOf("Safari")) != -1) {
+    br_name = "Safari";
+    br_full_version = nAgt.substring(verOffset + 7);
+    if ((verOffset = nAgt.indexOf("Version")) != -1)
+        br_full_version = nAgt.substring(verOffset + 8);
+}
+// In Firefox, the true version is after "Firefox" 
+else if ((verOffset = nAgt.indexOf("Firefox")) != -1) {
+    browserName = "Firefox";
+    br_full_version = nAgt.substring(verOffset + 8);
+}
+// In most other browsers, "name/version" is at the end of userAgent 
+else if ((nameOffset = nAgt.lastIndexOf(' ') + 1) <
+    (verOffset = nAgt.lastIndexOf('/'))) {
+    browserName = nAgt.substring(nameOffset, verOffset);
+    br_full_version = nAgt.substring(verOffset + 1);
+    if (browserName.toLowerCase() == browserName.toUpperCase()) {
+        browserName = navigator.appName;
+    }
+}
+// trim the br_full_version string at semicolon/space if present
+if ((ix = br_full_version.indexOf(";")) != -1)
+    br_full_version = br_full_version.substring(0, ix);
+if ((ix = br_full_version.indexOf(" ")) != -1)
+    br_full_version = br_full_version.substring(0, ix);
+
+br_major_version = parseInt('' + br_full_version, 10);
+if (isNaN(br_major_version)) {
+    br_full_version = '' + parseFloat(navigator.appVersion);
+    br_major_version = parseInt(navigator.appVersion, 10);
+}
+
+/**
+* Returns a random integer between min (inclusive) and max (inclusive).
+* The value is no lower than min (or the next integer greater than min
+* if min isn't an integer) and no greater than max (or the next integer
+* lower than max if max isn't an integer).
+* Using Math.round() will give you a non-uniform distribution!
+*/
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/**
+ * Shuffles array in place.
+ * @param {Array} a items An array containing the items.
+ */
+function shuffle(a) {
+    var j, x, i;
+    for (i = a.length - 1; i > 0; i--) {
+        j = Math.floor(Math.random() * (i + 1));
+        x = a[i];
+        a[i] = a[j];
+        a[j] = x;
+    }
+    return a;
+}
+
+function onlyUnique(value, index, self) { 
+    return self.indexOf(value) === index;
+}
+
+/**
+ * Get parameter from URL.
+ */
+var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+        }
+    }
+};
+
+// fetch from the URL param
+var debug = getUrlParameter('debug');
+// if not provided, use CONST
+if (debug == undefined) {
+    debug = SHOW_DEBUG;
+} else {
+    // convert from string to bool
+    debug = /^true$/i.test(debug);
+}
+
+if (debug) {
+    console.log('debug', debug);
+}
+
+// fetch from the URL param
+var save_data = getUrlParameter('save_data');
+// if not provided, use CONST
+if (save_data == undefined) {
+    save_data = SAVE_DATA;
+} else {
+    // convert from string to bool
+    save_data = /^true$/i.test(save_data);
+}
+
+if (debug) {
+    console.log('save_data', save_data);
+}
+
+// fetch from the URL param
+var eye_tracking = getUrlParameter('eye_tracking');
+// if not provided, use CONST
+if (eye_tracking == undefined) {
+    eye_tracking = EYE_TRACKING;
+} else {
+    // convert from string to bool
+    eye_tracking = /^true$/i.test(eye_tracking);
+}
+
+if (debug) {
+    console.log('eye_tracking', eye_tracking);
+}
+
+// fetch from the URL param
+var calibration_num = getUrlParameter('calibration_num');
+// if not provided, use CONST
+if (calibration_num == undefined) {
+    calibration_num = CALIBRATION_NUM;
+} else {
+    // convert from string to int
+    calibration_num = Number(calibration_num);
+}
+
+if (debug) {
+    console.log('calibration_num', calibration_num);
+}
+
+/**
+ * Get code for the worker.
+ */
+function getWorkerCode() {
+    // fetch from the URL param
+    var worker_code = getUrlParameter('worker_code');
+    // if not provided, generate
+    if (worker_code == undefined) {
+        var timestamp = window.performance.timing.navigationStart + window.performance.now();
+        var current_time = Math.round(timestamp);
+        var random_num = getRandomInt(1, 10000);
+        worker_code = 'T3' + current_time + 'KC' + random_num + '8H';
+        return worker_code;
+    } else {
+        return worker_code;
+    }
+    
+}
+
+var worker_code = getWorkerCode();
+if (debug) {
+    console.log('worker_code', worker_code);
+}
+
+/**
+ * Initialise jsPsych.
+ */
+var jsPsych = initJsPsych({
+    on_finish: function() {
+        window.location = 'finish?work=' + worker_code;
+    },
+    on_interaction_data_update: function(data) {
+        interactions.push(data)
+    },
+    extensions: [
+        {type: jsPsychExtensionWebgazer}
+    ]
+});
+
+/**
+ * Save data.
+ */
+function saveData() {
+    // check if data needs to be saved
+    if (save_data) {
+        // add worker ID and browser interactions
+        jsPsych.data.get().addToLast({
+            worker_code: worker_code,
+            interactions: interactions,
+            window_width: $(window).width(),
+            window_height: $(window).height()
+        });
+        interactions = [];  // reset interactions
+
+        if (debug) {
+            console.log('saving data', jsPsych.data.get().json());
+        }
+        $.ajax({
+                type: 'POST',
+                url: '/experiment-data',
+                data: jsPsych.data.get().json(),
+                contentType: 'application/json'
+            })
+            .done(function() {
+                jsPsych.data.reset();
+            })
+            .fail(function() {
+                alert('A problem occurred while writing to the database. Please contact the researcher for more information.')
+                window.location = '/';
+            })
+        if (debug) {
+            console.log('data saved');
+        }
+    }
+}
+
+if (debug) {
+    console.log('browser name', br_name);
+    console.log('browser full version', br_full_version);
+    console.log('browser major version', br_major_version);
+    console.log('browser navigator.appName', navigator.appName);
+    console.log('browser navigator.userAgent', navigator.userAgent);
+    console.log('window width initial', window_width);
+    console.log('window height initial', window_height);
+}
+
+// Attention check questions
+var attention_wrong_count = 0;
+
+var attention_questions = [
+    {
+        question: 'What is 2+2?',
+        options: ['22', '4', '12'],
+        correct: '4'
+    },
+    {
+        question: 'What is required during this experiment?',
+        options: ['For me to observe artworks', 'For me to sing to displayed sheet music', 'For me to draw prompted patterns on the screen'],
+        correct: 'For me to observe artworks'
+    },
+    {
+        question: 'Select true statement',
+        options: ['Paris is capital of Germany', 'Water is wet', 'Sun is purple'],
+        correct: 'Water is wet'
+    },
+    {
+        question: 'What are you observing during this experiment?',
+        options: ['Traffic scenarios', 'Artworks', 'Supermarket products'],
+        correct: 'Artworks'
+    },
+    {
+        question: 'Please select "Van Gogh" to confirm you are reading carefully.',  // embedded trap/attention check
+        options: ['Picasso', 'Rembrandt', 'Van Gogh'],
+        correct: 'Van Gogh'
+    }
+];
+
+// Shuffle attention questions once
+attention_questions = shuffle(attention_questions);
+
+// Create slots: one attention question injected before a randomly chosen continue_block
+// Pick n_attention random indices from the trial range (without replacement)
+var n_attention = attention_questions.length;
+var trial_indices = [];
+for (var t = 0; t < n_images_per_participant * n_images_repeat; t++) {
+    trial_indices.push(t);
+}
+trial_indices = shuffle(trial_indices);
+var attention_insert_at = trial_indices.slice(0, n_attention).sort(function(a, b) { return a - b; });
+
+if (debug) {
+    console.log('attention checks inserted before trials:', attention_insert_at);
+}
+
+// build pool of unique ids, shuffle, take subset, then repeat
+var all_image_ids = [];
+for (var i = 1; i <= n_images; i++) {
+    all_image_ids.push(i);
+}
+all_image_ids = shuffle(all_image_ids);
+all_image_ids = all_image_ids.slice(0, n_images_per_participant);
+
+image_ids = [];
+for (var j = 0; j < n_images_repeat; j++) {
+    image_ids = image_ids.concat(all_image_ids);
+}
+image_ids = shuffle(image_ids);
+
+// define instructions block
+var instructions_block = {
+    type: jsPsychInstructions,
+    pages: [
+        '<div class="jumbotron jumbotron-fluid" style="text-align: left;"><div class="container"><h1 class="display-4">Introduction</h1><p class="lead">In this experiment, you will view a total of ' + n_images_per_participant + ' objects taken from the collections of the Rijksmuseum, Amsterdam, The Netherlands. Each object will be on display for ' + trial_duration / 1000 + ' seconds, during which you are invited to observe the work freely, making sure that your eye gaze never leaves the screen. After seeing each object, you will be invited to answer some questions that measure your experience, presented on a scale.</p><p>The window of your browser should be at least 1300px wide and 800px tall.</p><hr><p>Press \'Next\' to start the experiment.</p></div></div>'
+    ],
+    show_clickable_nav: true,
+    data: {
+        browser_name: br_name,
+        browser_full_version: br_full_version,
+        browser_major_version: br_major_version,
+        browser_app_name: navigator.appName,
+        browser_user_agent: navigator.userAgent,
+        image_ids: image_ids,
+        window_height_init: window_height,
+        window_width_init: window_width,
+        worker_code: worker_code,
+    }
+}
+
+// blocks with stimuli
+images_preload = [];
+for (var i = 0; i < n_images_per_participant * n_images_repeat; i++) {
+    images_preload.push(simulus_pfefix + image_ids[i] + '.jpg');
+    image_stimuli.push({
+        type: jsPsychImageKeyboardResponse,
+        // stimulus_width: 1280,
+        stimulus_height: 720,
+        choices: "NO_KEYS",
+        stimulus: [simulus_pfefix + image_ids[i] + '.jpg'],
+        prompt: '<p>Study this image for ' + trial_duration / 1000 + ' seconds.</p>',
+        trial_duration: trial_duration,
+        extensions: [
+          {
+            type: jsPsychExtensionWebgazer, 
+            params: {targets: ['#jspsych-image-keyboard-response-stimulus']}
+          }
+        ]
+    });
+}
+
+// continue before showing the image
+var continue_block = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: '<p>Press \'C\' to continue to the next page with an image.</p>',
+    choices: ['C']
+};
+
+// questions after each stimulus
+var qs_image = {
+    type: jsPsychSurveyHtmlFormSlider,
+    preamble: 'Answer the questions about <strong>the object that you just saw</strong> by moving the sliders. You will not be able to continue before moving all sliders.',
+    require_movement: true,
+    html: '<div id="jspsych-html-slider-response-wrapper" style="margin: 20px 0px;"><div id="jspsych-html-slider-response-stimulus">I find this object visually appealing.</div><div class="jspsych-html-slider-response-container" style="position:relative; margin: 0 auto 3em auto; width:1000px;" id="slider-0"><input type="range" name="slider-0" class="jspsych-slider" value="50" min="0" max="100" step="1" id="jspsych-html-slider-response-response"><div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(0% - (25% / 2) - -7.5px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Completely<br>disagree</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(25% - (25% / 2) - -3.75px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Disagree</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(50% - (25% / 2) - 0px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Neither disagree<br>nor agree</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(75% - (25% / 2) - 3.75px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Agree</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(100% - (25% / 2) - 7.5px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Completely<br>agree</span></div></div></div></div></div><div id="jspsych-html-slider-response-wrapper" style="margin: 100px 0px;"><div id="jspsych-html-slider-response-stimulus">This object evokes an emotional response in me.</div><div class="jspsych-html-slider-response-container" style="position:relative; margin: 0 auto 3em auto; width:1000px;" id="slider-1"><input type="range" name="slider-1" class="jspsych-slider" value="50" min="0" max="100" step="1" id="jspsych-html-slider-response-response"><div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(0% - (25% / 2) - -7.5px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Completely<br>disagree</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(25% - (25% / 2) - -3.75px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Disagree</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(50% - (25% / 2) - 0px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Neither disagree<br>nor agree</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(75% - (25% / 2) - 3.75px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Agree</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(100% - (25% / 2) - 7.5px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Completely<br>agree</span></div></div></div></div></div><div id="jspsych-html-slider-response-wrapper" style="margin: 100px 0px;"><div id="jspsych-html-slider-response-stimulus">I would like to know more about this object.</div><div class="jspsych-html-slider-response-container" style="position:relative; margin: 0 auto 3em auto; width:1000px;" id="slider-2"><input type="range" name="slider-2" class="jspsych-slider" value="50" min="0" max="100" step="1" id="jspsych-html-slider-response-response"><div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(0% - (25% / 2) - -7.5px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Completely<br>disagree</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(25% - (25% / 2) - -3.75px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Disagree</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(50% - (25% / 2) - 0px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Neither disagree<br>nor agree</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(75% - (25% / 2) - 3.75px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Agree</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(100% - (25% / 2) - 7.5px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Completely<br>agree</span></div></div></div></div></div><div id="jspsych-html-slider-response-wrapper" style="margin: 0px 0px;"><div id="jspsych-html-slider-response-stimulus">I have seen this object before. (required)</div><div class="jspsych-html-slider-response-container" style="position:relative; margin: 0 auto 0 auto; width:1000px;" id="radio-seen"><label style="margin-right: 30px; font-size: 100%; cursor: pointer;"><input type="radio" name="seen-before" value="yes" required style="margin-right: 6px;">Yes</label><label style="font-size: 100%; cursor: pointer;"><input type="radio" name="seen-before" value="no" required style="margin-right: 6px;">No</label></div></div><div id="jspsych-html-slider-response-wrapper" style="margin: 20px 0px 0px 0px;"><div id="jspsych-html-slider-response-stimulus">What thoughts and feelings come to mind while observing this object? (you may enter multiple sentences; required)</div><div class="jspsych-html-slider-response-container" style="position:relative; margin: 0 auto 0 auto; width:1000px;" id="text-opinion"><textarea type="text" name="opinion" rows="3" maxlength="600" required style="width: 100%; box-sizing: border-box; resize: vertical; overflow-y: auto;"></textarea><div></div></div></div></div>',
+    items: 3,
+};
+
+var camera_instructions = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `
+    <div class="jumbotron jumbotron-fluid" style="text-align: left;"><div class="container"><h1 class="display-4">Configuration of camera</h1><p class="lead">In order to participate you must allow the experiment to use your camera. You will be prompted to do this on the next screen. If you do not wish to allow use of your camera, you cannot participate in this experiment. It may take up to 30 seconds for the camera to initialize after you give permission. No video recording from your camera will be saved. Only information about where you looked at the screen will be saved.<hr><p>Press \'C\' to proceed.</p></div></div>
+    `,
+    choices: ['C'],
+}
+
+var init_camera = {
+    type: jsPsychWebgazerInitCamera
+}
+
+var calibration_instructions = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `
+      <div class="jumbotron jumbotron-fluid" style="text-align: left;"><div class="container"><h1 class="display-4">Calibration of eye tracker</h1><p class="lead">Now you will calibrate the eye tracking, so that the software can use the image of your eyes to predict where you are looking. You will see a series of dots appear on the screen. Look at each dot and click on it.<hr><p>Press \'C\' to proceed.</p></div></div>
+    `,
+    choices: ['C'],
+}
+
+var calibration = {
+    type: jsPsychWebgazerCalibrate,
+    calibration_points: [
+      [25,25],[75,25],[50,50],[25,75],[75,75]
+    ],
+    repetitions_per_point: calibration_num,
+    randomize_calibration_order: true
+}
+
+var validation_instructions = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `
+      <div class="jumbotron jumbotron-fluid" style="text-align: left;"><div class="container"><h1 class="display-4">Accuracy of the calibration</h1><p class="lead">Now we will measure the accuracy of the calibration. Look at each dot as it appears on the screen. <span style="font-weight: bold;">You do not need to click on the dots this time.</span><hr><p>Press \'C\' to proceed.</p></div></div>
+    `,
+    choices: ['C'],
+    post_trial_gap: 1000
+}
+
+var validation = {
+    type: jsPsychWebgazerValidate,
+    validation_points: [
+        [25,25],[75,25],[50,50],[25,75],[75,75]
+    ],
+    roi_radius: 200,
+    time_to_saccade: 1000,
+    validation_duration: 2000,
+    data: {
+        task: 'validate'
+    }
+}
+
+var recalibrate_instructions = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `
+        <div class="jumbotron jumbotron-fluid" style="text-align: left;"><div class="container"><h1 class="display-4">Insufficient accuracy of calibration</h1><p class="lead">The accuracy of the calibration is a lower than we would like. Let's try calibrating one more time. On the next screen, look at the dots and click on them.<hr><p>Press \'C\' to proceed.</p></div></div>
+    `,
+    choices: ['C'],
+}
+
+var recalibrate = {
+    timeline: [recalibrate_instructions, calibration, validation_instructions, validation],
+    conditional_function: function(){
+        var validation_data = jsPsych.data.get().filter({task: 'validate'}).values()[0];
+        return validation_data.percent_in_roi.some(function(x){
+            var minimum_percent_acceptable = 50;
+            return x < minimum_percent_acceptable;
+        });
+    },
+    data: {
+        phase: 'recalibration'
+    }
+}
+
+var calibration_done = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `
+        <div class="jumbotron jumbotron-fluid" style="text-align: left;"><div class="container"><h1 class="display-4">Calibration completed</h1><p class="lead">Calibration of eye tracking is complete, thank you for your patience. <hr><p>Press \'C\' to proceed to the instructions for the experiment.</p>
+    `,
+    choices: ['C'],
+}
+
+// block for sending data
+var save_data_block = {
+    type: jsPsychCallFunction,
+    func: function() {
+        saveData(); // save data
+    }
+}
+
+// enter full screen
+var fullscreen_enter = {
+    type: jsPsychFullscreen,
+    fullscreen_mode: true
+}
+
+// exit full screen
+var fullscreen_exit = {
+    type: jsPsychFullscreen,
+    fullscreen_mode: false
+}
+
+// create experiment timeline array
+var timeline = [];
+
+/* preload images */
+var preload = {
+  type: jsPsychPreload,
+  show_progress_bar: true,
+  auto_preload: true,
+  max_load_time: 3000000,
+  images: images_preload,
+};
+timeline.push(preload);
+if (debug) {
+    console.log('preloading finished');
+}
+
+timeline.push(fullscreen_enter);  // enter full screen
+if (eye_tracking) {  // toggle for using eye tracking
+    timeline.push(camera_instructions); 
+    timeline.push(init_camera); 
+    timeline.push(calibration_instructions); 
+    timeline.push(calibration); 
+    timeline.push(validation_instructions); 
+    timeline.push(validation); 
+    timeline.push(recalibrate);
+    timeline.push(calibration_done);
+    timeline.push(save_data_block);  // save data
+}
+
+// instructions page
+timeline.push(instructions_block);  // instructions
+// iterate over blocks
+var attention_q_index = 0;
+for (var i = 0; i < n_images_per_participant * n_images_repeat; i++) {
+    // inject attention question before this trial if scheduled
+    if (attention_insert_at.indexOf(i) !== -1 && attention_q_index < attention_questions.length) {
+        (function(idx) {
+            var aq = attention_questions[idx];
+            var question_page = {
+                type: jsPsychSurveyMultiChoice,
+                questions: [
+                    {
+                        prompt: aq.question,
+                        name: 'attention_q_' + idx,
+                        options: aq.options,
+                        required: true
+                    }
+                ],
+                on_finish: function(data) {
+                    var response = data.response['attention_q_' + idx];
+                    if (response !== aq.correct) {
+                        attention_wrong_count++;
+                        if (debug) {
+                            console.log('Wrong answer for question', idx, '| total wrong:', attention_wrong_count);
+                        }
+                        if (attention_wrong_count >= MAX_WRONG_THRESHOLD) {
+                            saveData(); // save data
+                            window.location = 'finish_fail';
+                        }
+                    }
+                }
+            };
+            timeline.push(question_page);
+        })(attention_q_index);
+        attention_q_index++;
+    }
+    timeline.push(continue_block); // page to continue to next trial
+    timeline.push(image_stimuli[i]);  // page with the stimulus
+    timeline.push(qs_image);
+    timeline.push(save_data_block);  // save data
+}
+timeline.push(fullscreen_exit);  // exit full screen
+// timeline.push(save_data_block);  // save data
+
+if (debug) {
+    console.log('timeline', timeline);
+    console.log('image_ids', image_ids);
+    console.log('image_stimuli', image_stimuli);
+    console.log('images_preload', images_preload);
+}
+
+/* Start the experiment */
+jsPsych.run(timeline);
+
+</script>
+</html>
+ 

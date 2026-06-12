@@ -1,0 +1,8 @@
+[
+    {
+      "origin": ["https://art-crowdsourced.herokuapp.com"],
+      "method": ["GET"],
+      "responseHeader": ["Content-Type"],
+      "maxAgeSeconds": 3600
+    }
+]

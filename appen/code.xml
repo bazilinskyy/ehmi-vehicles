@@ -1,0 +1,103 @@
+<div class="html-element-wrapper">
+  <p class="header">
+    <strong>General questions</strong>
+  </p>
+</div>
+<cml:radios label="Do you consent to participate in this study in the way that is described in the information shown above?" class="" validates="required">
+  <cml:radio label="Yes" id="" value="yes"/>
+  <cml:radio label="No" id="" value="no"/>
+</cml:radios>
+<cml:radios label="Have you read and understood the above instructions?" class="" validates="required">
+  <cml:radio label="Yes" id="" value="yes"/>
+  <cml:radio label="No" id="" value="no"/>
+</cml:radios>
+<cml:radios label="What is your gender?" class="" validates="required">
+  <cml:radio label="Male" value="male"/>
+  <cml:radio label="Female" value="female"/>
+  <cml:radio label="Other" id="" value="other"/>
+  <cml:radio label="I prefer not to respond" id="" value="i_prefer_not_to_respond"/>
+</cml:radios>
+<cml:text label="What is your age?" class="" validates="required positiveInteger"/>
+<cml:radios label="What is your highest level of eduation?" class="" id="" validates="required">
+  <cml:radio label="No formal education" id="" value="no_formal_education"/>
+  <cml:radio label="Primary / Elementary school" id="" value="primary"/>
+  <cml:radio label="Secondary / High school (incomplete)" id="" value="secondary_incomplete"/>
+  <cml:radio label="Secondary / High school diploma or equivalent" id="" value="high"/>
+  <cml:radio label="Vocational / Technical training" id="" value="vocational"/>
+  <cml:radio label="Some college or university (no degree)" id="" value="some_college"/>
+  <cml:radio label="Bachelor's degree" id="" value="bachelor"/>
+  <cml:radio label="Master's degree" id="" value="master"/>
+  <cml:radio label="Doctoral degree (PhD, MD, JD, etc.)" id="" value="doctoral"/>
+  <cml:radio label="I prefer not to respond" id="" value="i_prefer_not_to_respond"/>
+</cml:radios>
+<cml:radios label="How familiar or knowledgeable are you about art?" class="" id="" validates="required">
+  <cml:radio label="No knowledge at all" id="" value="no_knowledge"/>
+  <cml:radio label="Very limited knowledge" id="" value="very_limited"/>
+  <cml:radio label="Some basic familiarity" id="" value="basic"/>
+  <cml:radio label="Moderate knowledge" id="" value="moderate"/>
+  <cml:radio label="Good knowledge" id="" value="good"/>
+  <cml:radio label="Expert-level knowledge" id="" value="expert"/>
+  <cml:radio label="I prefer not to respond" id="" value="i_prefer_not_to_respond"/>
+</cml:radios>
+<cml:radios label="How often do you visit art museums?" class="" id="" validates="required">
+  <cml:radio label="Never" id="" value="never"/>
+  <cml:radio label="Rarely (once a year or less)" id="" value="rarely"/>
+  <cml:radio label="Occasionally (2–3 times a year)" id="" value="occasionally"/>
+  <cml:radio label="Regularly (once a month)" id="" value="regularly"/>
+  <cml:radio label="Frequently (several times a month)" id="" value="frequently"/>
+  <cml:radio label="I prefer not to respond" id="" value="i_prefer_not_to_respond"/>
+</cml:radios>
+<cml:radios label="What are your religious beliefs?" class="" id="" validates="required">
+  <cml:radio label="Christian (general)" id="" value="christian"/>
+  <cml:radio label="Catholic" id="" value="catholic"/>
+  <cml:radio label="Protestant" id="" value="protestant"/>
+  <cml:radio label="Orthodox Christian" id="" value="orthodox_christian"/>
+  <cml:radio label="Muslim (Sunni)" id="" value="muslim_sunni"/>
+  <cml:radio label="Muslim (Shia)" id="" value="muslim_shia"/>
+  <cml:radio label="Jewish" id="" value="jewish"/>
+  <cml:radio label="Hindu" id="" value="hindu"/>
+  <cml:radio label="Buddhist" id="" value="buddhist"/>
+  <cml:radio label="Sikh" id="" value="sikh"/>
+  <cml:radio label="Bahá'í" id="" value="bahai"/>
+  <cml:radio label="Indigenous / Traditional beliefs" id="" value="indigenous"/>
+  <cml:radio label="No religion / Atheist" id="" value="atheist"/>
+  <cml:radio label="Agnostic" id="" value="agnostic"/>
+  <cml:radio label="Other" id="" value="other"/>
+  <cml:radio label="I prefer not to respond" id="" value="i_prefer_not_to_respond"/>
+</cml:radios>
+<cml:text label="If you answered 'Other' in the previous question, please describe your religious beliefs below."/>
+<cml:radios label="In which type of place are you located now?" class="" id="" validates="required">
+  <cml:radio label="Indoor, dark" id="" value="indoor_dark"/>
+  <cml:radio label="Indoor, dim light" id="" value="indoor_dimlight"/>
+  <cml:radio label="Indoor, bright light" id="" value="indoor_brightlight"/>
+  <cml:radio label="Outdoor, dark" id="" value="outdoor_dark"/>
+  <cml:radio label="Outdoor, dim light" id="" value="outdoor_dimlight"/>
+  <cml:radio label="Outdoor, bright light" id="" value="outdoor_brightlight"/>
+  <cml:radio label="Other" id="" value="other"/>
+  <cml:radio label="I prefer not to respond" id="" value="i_prefer_not_to_respond"/>
+</cml:radios>
+<cml:text label="If you answered 'Other' in the previous question, please describe the place where you are located now below."/>
+<cml:radios label="Which input device are you using now?" class="" id="" validates="required">
+  <cml:radio label="Laptop keyboard" id="" value="laptop_keyboard"/>
+  <cml:radio label="Desktop keyboard" id="" value="desktop_keyboard"/>
+  <cml:radio label="Tablet on-screen keyboard" id="" value="tablet_keyboard"/>
+  <cml:radio label="Mobile phone on-screen keyboard" id="" value="mobile_keyboard"/>
+  <cml:radio label="Other" id="" value="other"/>
+  <cml:radio label="I prefer not to respond" id="" value="i_prefer_not_to_respond"/>
+</cml:radios>
+<cml:text label="If you answered 'Other' in the previous question, please describe your input device below."/>
+<p class="header">
+  <strong>Experiment on perception of art</strong>
+  <br/>
+  In this experiment, you will see multiple images of museum objects. Each image will be shown for 10 seconds, and you will be asked to answer a few questions about each image. At various points during the experiment, you will also be asked to answer 5 questions on different topics to check how attentive you are. <em>Answering 3 questions incorrectly will cause the study to finish, and you will not be able to receive money.</em> Please pay attention to the instructions.
+  <br/>
+  <br/>
+  You will be asked to leave Appen to participate in the experiment. You will need to open the link below. Do not close this Appen tab. At the end of the experiment, you will be given a code to input in the next question on this Appen tab. Please take a note of the code. Without the code, you will not be able to receive money for your participation. All images will be downloaded before the start of the experiment. It may take a few minutes. Please do not close your browser during that time.
+  <br/>
+</p>
+<p class="header2">Open 
+  <strong>
+    <a target="_blank" href="https://art-crowdsourced-d07f74c7357d.herokuapp.com">this link</a>
+  </strong> to start the experiment.
+</p>
+<cml:text label="Type the code that you received at the end of the experiment." class="" validates="required regex" data-validates-regex="^T3\d+\s?KC\d+\s?8H\s?$" data-validates-regex-message="Please enter the correct code to receive your money."/>
