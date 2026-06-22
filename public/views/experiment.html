@@ -391,6 +391,22 @@ var instructions_block = {
     }
 }
 
+var last_image_seen = null;
+
+function imageThumbnailPreamble(extraText) {
+    if (last_image_seen === null) {
+        return extraText;
+
+    }
+    return `
+        <div style="text-align:center; margin-bottom: 25px;">
+            <img src="${last_image_seen}" 
+                 style="max-width: 320px; max-height: 180px; border: 1px solid #ccc; margin-bottom: 15px;">
+            <p>${extraText}</p>
+        </div>
+    `;
+}
+
 // blocks with stimuli
 images_preload = [];
 for (var i = 0; i < n_images_per_participant * n_images_repeat; i++) {
@@ -403,6 +419,9 @@ for (var i = 0; i < n_images_per_participant * n_images_repeat; i++) {
         stimulus: [simulus_pfefix + image_ids[i] + '.jpg'],
         prompt: '<p>Study this image for ' + trial_duration / 1000 + ' seconds.</p>',
         trial_duration: trial_duration,
+        on_start: function(trial) {
+            last_image_seen = trial.stimulus;
+        },  
         extensions: [
           {
             type: jsPsychExtensionWebgazer, 
@@ -422,11 +441,38 @@ var continue_block = {
 // questions after each stimulus
 var qs_image = {
     type: jsPsychSurveyHtmlFormSlider,
-    preamble: 'Answer the questions about <strong>the image that you just saw</strong> by moving the sliders. You will not be able to continue before moving all sliders.',
+    preamble: function() {
+        return imageThumbnailPreamble(
+            'Answer the questions about <strong>the image that you just saw</strong> by moving the sliders. You will not be able to continue before moving all sliders.'
+        );
+    },
     require_movement: true,
     html: '<div id="jspsych-html-slider-response-wrapper" style="margin: 20px 0px;"><div id="jspsych-html-slider-response-stimulus">Would you cross the road in this situation?</div><div class="jspsych-html-slider-response-container" style="position:relative; margin: 0 auto 3em auto; width:1000px;" id="slider-0"><input type="range" name="slider-0" class="jspsych-slider" value="50" min="0" max="100" step="1" id="jspsych-html-slider-response-response"><div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(0% - (25% / 2) - -7.5px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Definitely would<br>not cross</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(25% - (25% / 2) - -3.75px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Probably would<br>not cross</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(50% - (25% / 2) - 0px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Not sure /<br>Neutral</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(75% - (25% / 2) - 3.75px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Probably would<br>cross</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(100% - (25% / 2) - 7.5px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Definitely would<br>cross</span></div></div></div></div></div><div id="jspsych-html-slider-response-wrapper" style="margin: 100px 0px;"><div id="jspsych-html-slider-response-stimulus">How safe do you feel crossing in this situation?</div><div class="jspsych-html-slider-response-container" style="position:relative; margin: 0 auto 3em auto; width:1000px;" id="slider-1"><input type="range" name="slider-1" class="jspsych-slider" value="50" min="0" max="100" step="1" id="jspsych-html-slider-response-response"><div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(0% - (25% / 2) - -7.5px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Very unsafe</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(25% - (25% / 2) - -3.75px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Unsafe</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(50% - (25% / 2) - 0px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Neutral</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(75% - (25% / 2) - 3.75px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Safe</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(100% - (25% / 2) - 7.5px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Very safe</span></div></div></div></div></div><div id="jspsych-html-slider-response-wrapper" style="margin: 100px 0px;"><div id="jspsych-html-slider-response-stimulus">How clear is the message given by the vehicle?</div><div class="jspsych-html-slider-response-container" style="position:relative; margin: 0 auto 3em auto; width:1000px;" id="slider-2"><input type="range" name="slider-2" class="jspsych-slider" value="50" min="0" max="100" step="1" id="jspsych-html-slider-response-response"><div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(0% - (25% / 2) - -7.5px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Not clear</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(25% - (25% / 2) - -3.75px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Slightly clear</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(50% - (25% / 2) - 0px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Neutral</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(75% - (25% / 2) - 3.75px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Clear</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(100% - (25% / 2) - 7.5px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Very clear</span></div></div></div></div></div><div id="jspsych-html-slider-response-wrapper" style="margin: 100px 0px;"><div id="jspsych-html-slider-response-stimulus">How quickly can you understand what the vehicle intends to do?</div><div class="jspsych-html-slider-response-container" style="position:relative; margin: 0 auto 3em auto; width:1000px;" id="slider-3"><input type="range" name="slider-3" class="jspsych-slider" value="50" min="0" max="100" step="1" id="jspsych-html-slider-response-response"><div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(0% - (25% / 2) - -7.5px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Very slow</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(25% - (25% / 2) - -3.75px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Slow</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(50% - (25% / 2) - 0px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Moderate</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(75% - (25% / 2) - 3.75px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Fast</span></div></div><div style="border: 1px solid transparent; display: inline-block; position: absolute; left:calc(100% - (25% / 2) - 7.5px); text-align: center; width: 25%;"><span style="text-align: center; font-size: 80%;"><div class="slider-tick">|<br>Very fast</span></div></div></div></div></div>',
     items: 4,
 };
+
+var qs_image_multi = {
+    type: jsPsychSurveyMultiChoice,
+    questions: [
+      {
+        prompt: "Where did you look first in this image?",
+        name: "look_first",
+        options: ["The vehicle body", "The eHMI display (if present)", "Road markings/crosswalk", "Other"],
+        required: true
+      },
+      {
+        prompt: "Does the eHMI message (if present) seem appropriate for this situation?",
+        name: "appropriate",
+        options: ["Yes", "No", "Unsure/No eHMI present"],
+        required: true
+      }
+    ],
+    preamble: function() {
+        return imageThumbnailPreamble(
+            'Answer the questions about <strong>the image that you just saw</strong>.'
+        );
+    },
+  };
 
 var section1_text = {
     type: jsPsychSurveyText,
@@ -435,78 +481,182 @@ var section1_text = {
         prompt: "1. Age",
         name: "age",
         placeholder: "Enter your age",
-        required: true
+        required: true,
       },
       {
-        prompt: "3. Occupation",
+        prompt: "2. Occupation",
         name: "occupation",
         placeholder: "Enter your occupation",
         required: true
       },
       {
-        prompt: "5. Nationality",
+        prompt: "3. Nationality",
         name: "nationality",
         placeholder: "Enter your nationality",
         required: true
+      },
+      {
+        prompt: "4. Country of current residence",
+        name: "country_residence",
+        placeholder: "Enter your country of current residence",
+        required: true
       }
     ],
-    preamble: "Answer these questions:"
+    preamble: "Answer these questions."
   };
 
 var section1_choice = {
     type: jsPsychSurveyMultiChoice,
     questions: [
       {
-        prompt: "2. Gender",
+        prompt: "5. Gender",
         name: "gender",
         options: ["Male", "Female", "Other"],
         required: true
       },
       {
-        prompt: "4. How often do you walk on roads?",
+        prompt: "6. How often do you walk on roads?",
         name: "walking_frequency",
         options: ["Daily", "Few times a week", "Rarely"],
         required: true
+      },
+      {
+        prompt: "7. In your city, do vehicles typically yield to pedestrians at marked crosswalks?",
+        name: "vehicle_yield",
+        options: ["Never", "Rarely", "Sometimes", "Usually", "Always"],
+        required: true
+      },
+      {
+        prompt: "8. How often do you use your smartphone while crossing the road?",
+        name: "smartphone_while_crossing",
+        options: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+        required: true
       }
-    ]
+    ],
+    preamble: "Answer these questions."
   };
 
 var section2_choice = {
     type: jsPsychSurveyMultiChoice,
     questions: [
       {
-        prompt: "6. Have you heard of automated/driverless vehicles?",
+        prompt: "9. Have you heard of automated/driverless vehicles?",
         name: "av_awareness",
-        options: ["Yes", "No", "Maybe"],
+        options: ["Yes", "No", "Not sure"],
         required: true
       },
       {
-        prompt: "7. Have you seen vehicles with external displays or signals communicating with pedestrians?",
-        name: "ehmi_awareness",
-        options: ["Yes", "No", "Maybe"],
+        prompt: "10. Have you ever been a passenger in an automated/driverless vehicle?",
+        name: "av_passenger_experience",
+        options: ["Yes", "No"],
+        required: true
+      },
+      {
+        prompt: "11. How much do you trust automated/driverless vehicles to behave safely in your country's traffic conditions?",
+        name: "av_trust",
+        options: ["Not at all", "Slightly", "Moderately", "Highly", "Completely"],
         required: true
       }
     ],
-    preamble: "<h2>Section 2: Familiarity with Technology</h2>"
+    preamble: "Answer these questions."
   };
 
 var preference_trial = {
     type: jsPsychSurveyMultiChoice,
+    preamble: "Answer these final questions about your preferences and impressions.",
     questions: [
       {
-        prompt: "Among these options, which do you prefer most for safe crossing?",
-        name: "ehmi_preference",
+        prompt: "Among the following, which eHMI type do you prefer most for safe crossing?",
+        name: "ehmi_preference_safe_crossing",
         options: [
           "No eHMI",
-          "Text display",
-          "Light signal",
-          "Symbol/icon"
+          "Text display (English)",
+          "Light signal (color-based)",
+          "Symbol / Icon",
+          "Regional language text"
+        ],
+        required: true
+      },
+      {
+        prompt: "How much do you trust the vehicle to stop or yield when approaching a crosswalk?",
+        name: "trust_vehicle_yield",
+        options: [
+          "Not at all",
+          "Slightly",
+          "Moderately",
+          "Highly",
+          "Completely"
+        ],
+        required: true
+      },
+      {
+        prompt: "Which type of eHMI do you find most helpful overall?",
+        name: "most_helpful_ehmi",
+        options: [
+          "Text",
+          "Symbols / Icons",
+          "Lights",
+          "Combination of two or more"
+        ],
+        required: true
+      },
+      {
+        prompt: "If you selected 'Combination' above, which two would you prefer?",
+        name: "preferred_combination",
+        options: [
+          "Text + Light",
+          "Text + Symbol",
+          "Light + Symbol",
+          "Not applicable (I did not select Combination)"
+        ],
+        required: true
+      },
+      {
+        prompt: "Which vehicle type makes you feel least safe when crossing?",
+        name: "least_safe_vehicle_type",
+        options: [
+          "Car",
+          "Bus",
+          "Two-wheeler"
+        ],
+        required: true
+      },
+      {
+        prompt: "Where do you think the eHMI display should ideally be located on a vehicle?",
+        name: "ideal_ehmi_location",
+        options: [
+          "Front windshield",
+          "Hood/Bonnet",
+          "Front grille",
+          "Multiple locations simultaneously"
         ],
         required: true
       }
     ],
     button_label: "Next"
-  };
+};
+
+var preference_text_trial = {
+    type: jsPsychSurveyText,
+    preamble: "Answer these final questions about your preferences and impressions.",
+    questions: [
+      {
+        prompt: "Were any of the images confusing or unrealistic? If yes, please describe briefly.",
+        name: "confusing_unrealistic_images",
+        rows: 4,
+        columns: 80,
+        required: false
+      },
+      {
+        prompt: "What improvements would you suggest for vehicle-to-pedestrian communication?",
+        name: "suggested_improvements",
+        rows: 4,
+        columns: 80,
+        required: false
+      }
+    ],
+    button_label: "Next"
+};
 
 var camera_instructions = {
     type: jsPsychHtmlKeyboardResponse,
@@ -638,6 +788,9 @@ if (eye_tracking) {  // toggle for using eye tracking
     timeline.push(save_data_block);  // save data
 }
 
+timeline.push(preference_trial);  // questions in the end
+timeline.push(preference_text_trial);  // questions in the end 2
+
 // instructions page
 timeline.push(instructions_block);  // instructions
 timeline.push(section1_text);    // questions
@@ -681,9 +834,11 @@ for (var i = 0; i < n_images_per_participant * n_images_repeat; i++) {
     timeline.push(continue_block); // page to continue to next trial
     timeline.push(image_stimuli[i]);  // page with the stimulus
     timeline.push(qs_image);
+    timeline.push(qs_image_multi);
     timeline.push(save_data_block);  // save data
 }
-timeline.push(preference_trial);  // preference of type of interaction
+timeline.push(preference_trial);  // questions in the end
+timeline.push(preference_text_trial);  // questions in the end 2
 timeline.push(fullscreen_exit);  // exit full screen
 // timeline.push(save_data_block);  // save data
 
