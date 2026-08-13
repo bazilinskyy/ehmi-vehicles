@@ -409,6 +409,7 @@ function imageThumbnailPreamble(extraText) {
 
 // blocks with stimuli
 images_preload = [];
+images_preload.push('img/ehmi_intro.png'); //eHMI Intro image by added by K_Vamshi_krishna
 for (var i = 0; i < n_images_per_participant * n_images_repeat; i++) {
     images_preload.push(simulus_pfefix + image_ids[i] + '.jpg');
     image_stimuli.push({
@@ -560,6 +561,20 @@ var section2_choice = {
     ],
     preamble: "Answer these questions."
   };
+
+// eHMI Intro Guide block added by K_Vamshi_krishna
+var ehmi_intro_block = {
+    type: jsPsychInstructions,
+    pages: [
+        '<div class="jumbotron jumbotron-fluid" style="text-align: center;"><div class="container">' +
+        '<h1 class="display-4">What is an eHMI?</h1>' +
+        '<p class="lead">An <b>external Human-Machine Interface (eHMI)</b> is an external light or display on the front of a human-driven or automated vehicle that tells you what the car is doing so you can cross safely.</p>' +
+        '<img src="img/ehmi_intro.png" style="max-width: 85%; height: auto; border: 1px solid #ccc; border-radius: 8px; margin: 20px 0;">' +
+        '<p class="text-muted">Please review the reference guide above. Click <b>Next</b> to start the experiment.</p>' +
+        '</div></div>'
+    ],
+    show_clickable_nav: true
+};
 
 var preference_trial = {
     type: jsPsychSurveyMultiChoice,
@@ -793,6 +808,10 @@ timeline.push(instructions_block);  // instructions
 timeline.push(section1_text);    // questions
 timeline.push(section1_choice);  // questions
 timeline.push(section2_choice);  // questions
+
+// eHMI Participant Guide (shown just before test images)
+timeline.push(ehmi_intro_block);  // Added by K_Vamshi_Krishna
+
 // iterate over blocks
 var attention_q_index = 0;
 for (var i = 0; i < n_images_per_participant * n_images_repeat; i++) {
