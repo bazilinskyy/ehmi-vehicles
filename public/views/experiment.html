@@ -40,11 +40,11 @@
 
 // Constants
 var n_images = 136; // number of images
-var n_images_per_participant = 5; // number of images per participant
+var n_images_per_participant = 10; // number of images per participant
 var n_images_repeat = 1; // number of repeats of each condition
 var trial_duration = 5000; // amount of ms for showing an image stimulus
-var image_pfefix = 'img/'; // prefix for images
-var simulus_pfefix = 'img/stimuli/image_'; // prefix for videos
+var image_prefix = 'img/'; // prefix for images
+var stimulus_prefix = 'img/stimuli/image_'; // prefix for videos
 var SHOW_DEBUG = false; // switch for debugging output
 var SAVE_DATA = true; // save data or not
 var EYE_TRACKING = true; // use eye_tracking or not
@@ -644,36 +644,37 @@ var preference_trial_part2 = {
     type: jsPsychSurveyHtmlFormSlider,
     preamble: function() {
         return '<div style="text-align:center; margin-bottom: 25px;">' +
-               '<h3>Post-Experiment Questionnaire (Part 2 of 2)</h3>' +
-               '<p>Please rate each option individually on a scale from <strong>0</strong> to <strong>100</strong>.<br>' +
-               '<small class="text-muted">You must adjust all sliders to enable the continue button.</small></p>' +
+                 '<h3>Post-Experiment Questionnaire (Part 2 of 2)</h3>' +
+                 '<p>Please rate each option individually on a scale from <strong>0</strong> to <strong>100</strong>.<br>' +
+                 '<small class="text-muted">You must adjust all sliders to enable the continue button.</small></p>' +
                '</div>';
     },
     require_movement: true,
     items: 10,
     html: `
     <!-- Combination Pairs Preferences -->
-    div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
-    <h5 style="margin-bottom: 5px;">Preferred Combinations</h5>
-    ${buildSliderHTML(0, "combo_pref_text_light", "Text + Light", "0 (Not preferred)", "100 (Strongly preferred)", false)}
-    ${buildSliderHTML(1, "combo_pref_text_symbol", "Text + Symbol", "0 (Not preferred)", "100 (Strongly preferred)", false)}
-    ${buildSliderHTML(2, "combo_pref_light_symbol", "Light + Symbol", "0 (Not preferred)", "100 (Strongly preferred)", false)}
-  </div>
+    <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+      <h5 style="margin-bottom: 5px;">Preferred Combinations</h5>
+      ${buildSliderHTML(0, "combo_pref_text_light", "Text + Light", "0 (Not preferred)", "100 (Strongly preferred)", false)}
+      ${buildSliderHTML(1, "combo_pref_text_symbol", "Text + Symbol", "0 (Not preferred)", "100 (Strongly preferred)", false)}
+      ${buildSliderHTML(2, "combo_pref_light_symbol", "Light + Symbol", "0 (Not preferred)", "100 (Strongly preferred)", false)}
+    </div>
 
-  <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
-    <h5 style="margin-bottom: 5px;">Perceived Safety by Vehicle Type</h5>
-    ${buildSliderHTML(3, "safety_vehicle_car", "Car", "0 (Extremely Unsafe)", "100 (Extremely Safe)", true)}
-    ${buildSliderHTML(4, "safety_vehicle_bus", "Bus", "0 (Extremely Unsafe)", "100 (Extremely Safe)", true)}
-    ${buildSliderHTML(5, "safety_vehicle_twowheeler", "Two-wheeler", "0 (Extremely Unsafe)", "100 (Extremely Safe)", true)}
-  </div>
+    <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+      <h5 style="margin-bottom: 5px;">Perceived Safety by Vehicle Type</h5>
+      ${buildSliderHTML(3, "safety_vehicle_car", "Car", "0 (Extremely Unsafe)", "100 (Extremely Safe)", true)}
+      ${buildSliderHTML(4, "safety_vehicle_bus", "Bus", "0 (Extremely Unsafe)", "100 (Extremely Safe)", true)}
+      ${buildSliderHTML(5, "safety_vehicle_twowheeler", "Two-wheeler", "0 (Extremely Unsafe)", "100 (Extremely Safe)", true)}
+    </div>
 
-  <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
-    <h5 style="margin-bottom: 5px;">Ideal eHMI Display Location</h5>
-    ${buildSliderHTML(6, "location_windshield", "Front windshield", "0 (Not suitable)", "100 (Highly suitable)", false)}
-    ${buildSliderHTML(7, "location_hood", "Hood / Bonnet", "0 (Not suitable)", "100 (Highly suitable)", false)}
-    ${buildSliderHTML(8, "location_grille", "Front grille", "0 (Not suitable)", "100 (Highly suitable)", false)}
-    ${buildSliderHTML(9, "location_multiple", "Multiple locations simultaneously", "0 (Not suitable)", "100 (Highly suitable)", false)}
-  </div>
+    <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+      <h5 style="margin-bottom: 5px;">Ideal eHMI Display Location</h5>
+      ${buildSliderHTML(6, "location_windshield", "Front windshield", "0 (Not suitable)", "100 (Highly suitable)", false)}
+      ${buildSliderHTML(7, "location_hood", "Hood / Bonnet", "0 (Not suitable)", "100 (Highly suitable)", false)}
+      ${buildSliderHTML(8, "location_grille", "Front grille", "0 (Not suitable)", "100 (Highly suitable)", false)}
+      ${buildSliderHTML(9, "location_multiple", "Multiple locations simultaneously", "0 (Not suitable)", "100 (Highly suitable)", false)}
+    </div>
+    `
 };
 
 var preference_text_trial = {
