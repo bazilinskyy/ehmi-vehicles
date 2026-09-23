@@ -40,7 +40,7 @@
 
 // Constants
 var n_images = 136; // number of images
-var n_images_per_participant = 34; // number of images per participant
+var n_images_per_participant = 5; // number of images per participant
 var n_images_repeat = 1; // number of repeats of each condition
 var trial_duration = 5000; // amount of ms for showing an image stimulus
 var image_pfefix = 'img/'; // prefix for images
@@ -95,16 +95,16 @@ else if ((verOffset = nAgt.indexOf("Safari")) != -1) {
 }
 // In Firefox, the true version is after "Firefox" 
 else if ((verOffset = nAgt.indexOf("Firefox")) != -1) {
-    browserName = "Firefox";
+    br_name = "Firefox";
     br_full_version = nAgt.substring(verOffset + 8);
 }
 // In most other browsers, "name/version" is at the end of userAgent 
 else if ((nameOffset = nAgt.lastIndexOf(' ') + 1) <
     (verOffset = nAgt.lastIndexOf('/'))) {
-    browserName = nAgt.substring(nameOffset, verOffset);
+    br_name = nAgt.substring(nameOffset, verOffset);
     br_full_version = nAgt.substring(verOffset + 1);
-    if (browserName.toLowerCase() == browserName.toUpperCase()) {
-        browserName = navigator.appName;
+    if (br_name.toLowerCase() == br_name.toUpperCase()) {
+        br_name = navigator.appName;
     }
 }
 // trim the br_full_version string at semicolon/space if present
@@ -408,16 +408,16 @@ function imageThumbnailPreamble(extraText) {
 }
 
 // blocks with stimuli
-images_preload = [];
-images_preload.push('img/ehmi_intro.png'); //eHMI Intro image by added by K_Vamshi_krishna
+var images_preload = ['img/ehmi_intro.png']; //eHMI Intro image by added by K_Vamshi_krishna
 for (var i = 0; i < n_images_per_participant * n_images_repeat; i++) {
-    images_preload.push(simulus_pfefix + image_ids[i] + '.jpg');
+    var full_stim_path = stimulus_prefix + image_ids[i] + '.jpg';
+    images_preload.push(full_stim_path);
     image_stimuli.push({
         type: jsPsychImageKeyboardResponse,
         // stimulus_width: 1280,
         stimulus_height: 720,
         choices: "NO_KEYS",
-        stimulus: [simulus_pfefix + image_ids[i] + '.jpg'],
+        stimulus: full_stim_path,
         prompt: '<p>Study this image for ' + trial_duration / 1000 + ' seconds.</p>',
         trial_duration: trial_duration,
         on_start: function(trial) {
@@ -580,6 +580,24 @@ var ehmi_intro_block = {
     show_clickable_nav: true
 };
 
+// HELPER FUNCTION: Generates reliably working sliders that register movement in jsPsychSurveyHtmlFormSlider
+function buildSliderHTML(idNum, name, label, minLabel, maxLabel, hasMid) {
+    var midSpan = hasMid ? '<span style="position: absolute; left: 50%; transform: translateX(-50%); font-size: 75%;">Neutral (50)</span>' : '';
+    return `
+      <div id="jspsych-html-slider-response-wrapper" style="margin: 25px 0 35px 0;">
+        <label><strong>${label}</strong></label>
+        <div class="jspsych-html-slider-response-container" style="position:relative; margin: 10px auto 2.5em auto; width:900px;" id="slider-${idNum}">
+          <input type="range" name="${name}" class="jspsych-slider" value="50" min="0" max="100" step="1" id="slider-input-${idNum}">
+          <div>
+            <span style="position: absolute; left: 0%; font-size: 75%;">${minLabel}</span>
+            ${midSpan}
+            <span style="position: absolute; right: 0%; font-size: 75%;">${maxLabel}</span>
+          </div>
+        </div>
+      </div>
+    `;
+}
+
 // --- Post-Experiment Survey: Sliders Part 1 (eHMI Modalities & Trust) ---
 var preference_trial_part1 = {
     type: jsPsychSurveyHtmlFormSlider,
@@ -596,139 +614,28 @@ var preference_trial_part1 = {
     <!-- Overall Trust -->
     <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
       <h5 style="margin-bottom: 5px;">General Trust</h5>
-      <p style="color: #555; margin-bottom: 15px;">How much do you trust the vehicle to stop or yield when approaching a crosswalk?</p>
-      
-      <div style="position:relative; margin: 0 auto 3em auto; width:900px;">
-        <input type="range" name="trust_vehicle_yield" class="jspsych-slider" value="50" min="0" max="100" step="1">
-        <div>
-          <span style="position: absolute; left: 0%; transform: translateX(-50%); font-size: 80%;">|<br>Not at all (0)</span>
-          <span style="position: absolute; left: 25%; transform: translateX(-50%); font-size: 80%;">|<br>Slightly (25)</span>
-          <span style="position: absolute; left: 50%; transform: translateX(-50%); font-size: 80%;">|<br>Moderately (50)</span>
-          <span style="position: absolute; left: 75%; transform: translateX(-50%); font-size: 80%;">|<br>Highly (75)</span>
-          <span style="position: absolute; left: 100%; transform: translateX(-50%); font-size: 80%;">|<br>Completely (100)</span>
-        </div>
-      </div>
+      ${buildSliderHTML(0, "trust_vehicle_yield", "How much do you trust the vehicle to stop or yield at a crosswalk?", "Not at all (0)", "Completely (100)", true)}
     </div>
 
     <!-- eHMI Types for Safe Crossing -->
     <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
       <h5 style="margin-bottom: 5px;">eHMI Types for Safe Crossing</h5>
-      <p style="color: #555; margin-bottom: 15px;">Rate how much you prefer each eHMI type to help you make a safe crossing decision (0 = Not at all, 100 = Strongly prefer):</p>
-      
-      <!-- Sub-option: No eHMI -->
-      <div style="margin: 25px 0 35px 0;">
-        <label><strong>No eHMI:</strong></label>
-        <div style="position:relative; margin: 10px auto 2.5em auto; width:900px;">
-          <input type="range" name="ehmi_safe_no_ehmi" class="jspsych-slider" value="50" min="0" max="100" step="1">
-          <div>
-            <span style="position: absolute; left: 0%; font-size: 75%;">0 (Not at all preferred)</span>
-            <span style="position: absolute; right: 0%; font-size: 75%;">100 (Strongly preferred)</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sub-option: Text display (English) -->
-      <div style="margin: 25px 0 35px 0;">
-        <label><strong>Text display (English):</strong></label>
-        <div style="position:relative; margin: 10px auto 2.5em auto; width:900px;">
-          <input type="range" name="ehmi_safe_text_en" class="jspsych-slider" value="50" min="0" max="100" step="1">
-          <div>
-            <span style="position: absolute; left: 0%; font-size: 75%;">0 (Not at all preferred)</span>
-            <span style="position: absolute; right: 0%; font-size: 75%;">100 (Strongly preferred)</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sub-option: Light signal (color-based) -->
-      <div style="margin: 25px 0 35px 0;">
-        <label><strong>Light signal (color-based):</strong></label>
-        <div style="position:relative; margin: 10px auto 2.5em auto; width:900px;">
-          <input type="range" name="ehmi_safe_light" class="jspsych-slider" value="50" min="0" max="100" step="1">
-          <div>
-            <span style="position: absolute; left: 0%; font-size: 75%;">0 (Not at all preferred)</span>
-            <span style="position: absolute; right: 0%; font-size: 75%;">100 (Strongly preferred)</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sub-option: Symbol / Icon -->
-      <div style="margin: 25px 0 35px 0;">
-        <label><strong>Symbol / Icon:</strong></label>
-        <div style="position:relative; margin: 10px auto 2.5em auto; width:900px;">
-          <input type="range" name="ehmi_safe_symbol" class="jspsych-slider" value="50" min="0" max="100" step="1">
-          <div>
-            <span style="position: absolute; left: 0%; font-size: 75%;">0 (Not at all preferred)</span>
-            <span style="position: absolute; right: 0%; font-size: 75%;">100 (Strongly preferred)</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sub-option: Regional language text -->
-      <div style="margin: 25px 0 35px 0;">
-        <label><strong>Regional language text:</strong></label>
-        <div style="position:relative; margin: 10px auto 2.5em auto; width:900px;">
-          <input type="range" name="ehmi_safe_regional_text" class="jspsych-slider" value="50" min="0" max="100" step="1">
-          <div>
-            <span style="position: absolute; left: 0%; font-size: 75%;">0 (Not at all preferred)</span>
-            <span style="position: absolute; right: 0%; font-size: 75%;">100 (Strongly preferred)</span>
-          </div>
-        </div>
-      </div>
+      <p style="color: #555;">Rate how much you prefer each type (0 = Not preferred, 100 = Strongly preferred):</p>
+      ${buildSliderHTML(1, "ehmi_safe_no_ehmi", "No eHMI", "0 (Not preferred)", "100 (Strongly preferred)", false)}
+      ${buildSliderHTML(2, "ehmi_safe_text_en", "Text display (English)", "0 (Not preferred)", "100 (Strongly preferred)", false)}
+      ${buildSliderHTML(3, "ehmi_safe_light", "Light signal (color-based)", "0 (Not preferred)", "100 (Strongly preferred)", false)}
+      ${buildSliderHTML(4, "ehmi_safe_symbol", "Symbol / Icon", "0 (Not preferred)", "100 (Strongly preferred)", false)}
+      ${buildSliderHTML(5, "ehmi_safe_regional_text", "Regional language text", "0 (Not preferred)", "100 (Strongly preferred)", false)}
     </div>
 
-    <!-- Overall Helpfulness of eHMI Types -->
-    <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+  <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
       <h5 style="margin-bottom: 5px;">Overall Helpfulness</h5>
-      <p style="color: #555; margin-bottom: 15px;">Rate how helpful you find each communication style overall (0 = Not helpful, 100 = Extremely helpful):</p>
-      
-      <!-- Sub-option: Text -->
-      <div style="margin: 25px 0 35px 0;">
-        <label><strong>Text:</strong></label>
-        <div style="position:relative; margin: 10px auto 2.5em auto; width:900px;">
-          <input type="range" name="helpful_text" class="jspsych-slider" value="50" min="0" max="100" step="1">
-          <div>
-            <span style="position: absolute; left: 0%; font-size: 75%;">0 (Not helpful)</span>
-            <span style="position: absolute; right: 0%; font-size: 75%;">100 (Extremely helpful)</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sub-option: Symbols / Icons -->
-      <div style="margin: 25px 0 35px 0;">
-        <label><strong>Symbols / Icons:</strong></label>
-        <div style="position:relative; margin: 10px auto 2.5em auto; width:900px;">
-          <input type="range" name="helpful_symbols" class="jspsych-slider" value="50" min="0" max="100" step="1">
-          <div>
-            <span style="position: absolute; left: 0%; font-size: 75%;">0 (Not helpful)</span>
-            <span style="position: absolute; right: 0%; font-size: 75%;">100 (Extremely helpful)</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sub-option: Lights -->
-      <div style="margin: 25px 0 35px 0;">
-        <label><strong>Lights:</strong></label>
-        <div style="position:relative; margin: 10px auto 2.5em auto; width:900px;">
-          <input type="range" name="helpful_lights" class="jspsych-slider" value="50" min="0" max="100" step="1">
-          <div>
-            <span style="position: absolute; left: 0%; font-size: 75%;">0 (Not helpful)</span>
-            <span style="position: absolute; right: 0%; font-size: 75%;">100 (Extremely helpful)</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sub-option: Combination of two or more -->
-      <div style="margin: 25px 0 35px 0;">
-        <label><strong>Combination of two or more:</strong></label>
-        <div style="position:relative; margin: 10px auto 2.5em auto; width:900px;">
-          <input type="range" name="helpful_combination" class="jspsych-slider" value="50" min="0" max="100" step="1">
-          <div>
-            <span style="position: absolute; left: 0%; font-size: 75%;">0 (Not helpful)</span>
-            <span style="position: absolute; right: 0%; font-size: 75%;">100 (Extremely helpful)</span>
-          </div>
-        </div>
-      </div>
-    </div>
+      <p style="color: #555;">Rate helpfulness overall (0 = Not helpful, 100 = Extremely helpful):</p>
+      ${buildSliderHTML(6, "helpful_text", "Text", "0 (Not helpful)", "100 (Extremely helpful)", false)}
+      ${buildSliderHTML(7, "helpful_symbols", "Symbols / Icons", "0 (Not helpful)", "100 (Extremely helpful)", false)}
+      ${buildSliderHTML(8, "helpful_lights", "Lights", "0 (Not helpful)", "100 (Extremely helpful)", false)}
+      ${buildSliderHTML(9, "helpful_combination", "Combination of two or more", "0 (Not helpful)", "100 (Extremely helpful)", false)}
+  </div>
     `
 };
 
@@ -746,146 +653,27 @@ var preference_trial_part2 = {
     items: 10,
     html: `
     <!-- Combination Pairs Preferences -->
-    <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
-      <h5 style="margin-bottom: 5px;">Preferred Combinations</h5>
-      <p style="color: #555; margin-bottom: 15px;">Rate your preference for each potential interface combination (0 = Not at all, 100 = Strongly prefer):</p>
-      
-      <!-- Sub-option: Text + Light -->
-      <div style="margin: 25px 0 35px 0;">
-        <label><strong>Text + Light:</strong></label>
-        <div style="position:relative; margin: 10px auto 2.5em auto; width:900px;">
-          <input type="range" name="combo_pref_text_light" class="jspsych-slider" value="50" min="0" max="100" step="1">
-          <div>
-            <span style="position: absolute; left: 0%; font-size: 75%;">0 (Not at all preferred)</span>
-            <span style="position: absolute; right: 0%; font-size: 75%;">100 (Strongly preferred)</span>
-          </div>
-        </div>
-      </div>
+    div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+    <h5 style="margin-bottom: 5px;">Preferred Combinations</h5>
+    ${buildSliderHTML(0, "combo_pref_text_light", "Text + Light", "0 (Not preferred)", "100 (Strongly preferred)", false)}
+    ${buildSliderHTML(1, "combo_pref_text_symbol", "Text + Symbol", "0 (Not preferred)", "100 (Strongly preferred)", false)}
+    ${buildSliderHTML(2, "combo_pref_light_symbol", "Light + Symbol", "0 (Not preferred)", "100 (Strongly preferred)", false)}
+  </div>
 
-      <!-- Sub-option: Text + Symbol -->
-      <div style="margin: 25px 0 35px 0;">
-        <label><strong>Text + Symbol:</strong></label>
-        <div style="position:relative; margin: 10px auto 2.5em auto; width:900px;">
-          <input type="range" name="combo_pref_text_symbol" class="jspsych-slider" value="50" min="0" max="100" step="1">
-          <div>
-            <span style="position: absolute; left: 0%; font-size: 75%;">0 (Not at all preferred)</span>
-            <span style="position: absolute; right: 0%; font-size: 75%;">100 (Strongly preferred)</span>
-          </div>
-        </div>
-      </div>
+  <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+    <h5 style="margin-bottom: 5px;">Perceived Safety by Vehicle Type</h5>
+    ${buildSliderHTML(3, "safety_vehicle_car", "Car", "0 (Extremely Unsafe)", "100 (Extremely Safe)", true)}
+    ${buildSliderHTML(4, "safety_vehicle_bus", "Bus", "0 (Extremely Unsafe)", "100 (Extremely Safe)", true)}
+    ${buildSliderHTML(5, "safety_vehicle_twowheeler", "Two-wheeler", "0 (Extremely Unsafe)", "100 (Extremely Safe)", true)}
+  </div>
 
-      <!-- Sub-option: Light + Symbol -->
-      <div style="margin: 25px 0 35px 0;">
-        <label><strong>Light + Symbol:</strong></label>
-        <div style="position:relative; margin: 10px auto 2.5em auto; width:900px;">
-          <input type="range" name="combo_pref_light_symbol" class="jspsych-slider" value="50" min="0" max="100" step="1">
-          <div>
-            <span style="position: absolute; left: 0%; font-size: 75%;">0 (Not at all preferred)</span>
-            <span style="position: absolute; right: 0%; font-size: 75%;">100 (Strongly preferred)</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Perceived Danger / Safety per Vehicle Type -->
-    <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
-      <h5 style="margin-bottom: 5px;">Perceived Safety by Vehicle Type</h5>
-      <p style="color: #555; margin-bottom: 15px;">How safe or unsafe do you feel when crossing in front of each vehicle type?</p>
-      
-      <!-- Sub-option: Car -->
-      <div style="margin: 25px 0 35px 0;">
-        <label><strong>Car:</strong></label>
-        <div style="position:relative; margin: 10px auto 2.5em auto; width:900px;">
-          <input type="range" name="safety_vehicle_car" class="jspsych-slider" value="50" min="0" max="100" step="1">
-          <div>
-            <span style="position: absolute; left: 0%; font-size: 75%;">0 (Extremely Unsafe)</span>
-            <span style="position: absolute; left: 50%; transform: translateX(-50%); font-size: 75%;">50 (Neutral)</span>
-            <span style="position: absolute; right: 0%; font-size: 75%;">100 (Extremely Safe)</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sub-option: Bus -->
-      <div style="margin: 25px 0 35px 0;">
-        <label><strong>Bus:</strong></label>
-        <div style="position:relative; margin: 10px auto 2.5em auto; width:900px;">
-          <input type="range" name="safety_vehicle_bus" class="jspsych-slider" value="50" min="0" max="100" step="1">
-          <div>
-            <span style="position: absolute; left: 0%; font-size: 75%;">0 (Extremely Unsafe)</span>
-            <span style="position: absolute; left: 50%; transform: translateX(-50%); font-size: 75%;">50 (Neutral)</span>
-            <span style="position: absolute; right: 0%; font-size: 75%;">100 (Extremely Safe)</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sub-option: Two-wheeler -->
-      <div style="margin: 25px 0 35px 0;">
-        <label><strong>Two-wheeler:</strong></label>
-        <div style="position:relative; margin: 10px auto 2.5em auto; width:900px;">
-          <input type="range" name="safety_vehicle_twowheeler" class="jspsych-slider" value="50" min="0" max="100" step="1">
-          <div>
-            <span style="position: absolute; left: 0%; font-size: 75%;">0 (Extremely Unsafe)</span>
-            <span style="position: absolute; left: 50%; transform: translateX(-50%); font-size: 75%;">50 (Neutral)</span>
-            <span style="position: absolute; right: 0%; font-size: 75%;">100 (Extremely Safe)</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Ideal eHMI Display Locations -->
-    <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
-      <h5 style="margin-bottom: 5px;">Ideal eHMI Display Location</h5>
-      <p style="color: #555; margin-bottom: 15px;">Rate how suitable you consider each location for an eHMI display on the vehicle (0 = Not at all suitable, 100 = Highly suitable):</p>
-      
-      <!-- Sub-option: Front windshield -->
-      <div style="margin: 25px 0 35px 0;">
-        <label><strong>Front windshield:</strong></label>
-        <div style="position:relative; margin: 10px auto 2.5em auto; width:900px;">
-          <input type="range" name="location_windshield" class="jspsych-slider" value="50" min="0" max="100" step="1">
-          <div>
-            <span style="position: absolute; left: 0%; font-size: 75%;">0 (Not suitable)</span>
-            <span style="position: absolute; right: 0%; font-size: 75%;">100 (Highly suitable)</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sub-option: Hood / Bonnet -->
-      <div style="margin: 25px 0 35px 0;">
-        <label><strong>Hood / Bonnet:</strong></label>
-        <div style="position:relative; margin: 10px auto 2.5em auto; width:900px;">
-          <input type="range" name="location_hood" class="jspsych-slider" value="50" min="0" max="100" step="1">
-          <div>
-            <span style="position: absolute; left: 0%; font-size: 75%;">0 (Not suitable)</span>
-            <span style="position: absolute; right: 0%; font-size: 75%;">100 (Highly suitable)</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sub-option: Front grille -->
-      <div style="margin: 25px 0 35px 0;">
-        <label><strong>Front grille:</strong></label>
-        <div style="position:relative; margin: 10px auto 2.5em auto; width:900px;">
-          <input type="range" name="location_grille" class="jspsych-slider" value="50" min="0" max="100" step="1">
-          <div>
-            <span style="position: absolute; left: 0%; font-size: 75%;">0 (Not suitable)</span>
-            <span style="position: absolute; right: 0%; font-size: 75%;">100 (Highly suitable)</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sub-option: Multiple locations simultaneously -->
-      <div style="margin: 25px 0 35px 0;">
-        <label><strong>Multiple locations simultaneously:</strong></label>
-        <div style="position:relative; margin: 10px auto 2.5em auto; width:900px;">
-          <input type="range" name="location_multiple" class="jspsych-slider" value="50" min="0" max="100" step="1">
-          <div>
-            <span style="position: absolute; left: 0%; font-size: 75%;">0 (Not suitable)</span>
-            <span style="position: absolute; right: 0%; font-size: 75%;">100 (Highly suitable)</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    `
+  <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+    <h5 style="margin-bottom: 5px;">Ideal eHMI Display Location</h5>
+    ${buildSliderHTML(6, "location_windshield", "Front windshield", "0 (Not suitable)", "100 (Highly suitable)", false)}
+    ${buildSliderHTML(7, "location_hood", "Hood / Bonnet", "0 (Not suitable)", "100 (Highly suitable)", false)}
+    ${buildSliderHTML(8, "location_grille", "Front grille", "0 (Not suitable)", "100 (Highly suitable)", false)}
+    ${buildSliderHTML(9, "location_multiple", "Multiple locations simultaneously", "0 (Not suitable)", "100 (Highly suitable)", false)}
+  </div>
 };
 
 var preference_text_trial = {
@@ -1087,7 +875,7 @@ for (var i = 0; i < n_images_per_participant * n_images_repeat; i++) {
     timeline.push(continue_block); // page to continue to next trial
     timeline.push(image_stimuli[i]);  // page with the stimulus
     timeline.push(qs_image);
-    timeline.push(qs_image_multi);
+    // timeline.push(qs_image_multi);
     timeline.push(save_data_block);  // save data
 }
 
