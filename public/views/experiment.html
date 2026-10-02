@@ -630,7 +630,7 @@ var preference_trial_part1 = {
 
   <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
       <h5 style="margin-bottom: 5px;">Overall Helpfulness</h5>
-      <p style="color: #555;">Rate helpfulness overall (0 = Not helpful, 100 = Extremely helpful):</p>
+      <p style="color: #555;">Rate overall helpfulness of eHMI (0 = Not helpful, 100 = Extremely helpful):</p>
       ${buildSliderHTML(6, "helpful_text", "Text", "0 (Not helpful)", "100 (Extremely helpful)", false)}
       ${buildSliderHTML(7, "helpful_symbols", "Symbols / Icons", "0 (Not helpful)", "100 (Extremely helpful)", false)}
       ${buildSliderHTML(8, "helpful_lights", "Lights", "0 (Not helpful)", "100 (Extremely helpful)", false)}
@@ -654,26 +654,27 @@ var preference_trial_part2 = {
     html: `
     <!-- Combination Pairs Preferences -->
     <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
-      <h5 style="margin-bottom: 5px;">Preferred Combinations</h5>
+      <h5 style="margin-bottom: 5px;">Rate how much you prefer the following eHMI combinations</h5>
       ${buildSliderHTML(0, "combo_pref_text_light", "Text + Light", "0 (Not preferred)", "100 (Strongly preferred)", false)}
       ${buildSliderHTML(1, "combo_pref_text_symbol", "Text + Symbol", "0 (Not preferred)", "100 (Strongly preferred)", false)}
       ${buildSliderHTML(2, "combo_pref_light_symbol", "Light + Symbol", "0 (Not preferred)", "100 (Strongly preferred)", false)}
     </div>
 
     <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
-      <h5 style="margin-bottom: 5px;">Perceived Safety by Vehicle Type</h5>
+      <h5 style="margin-bottom: 5px;">Rate how safe you feel crossing in front of the following vehicles</h5>
       ${buildSliderHTML(3, "safety_vehicle_car", "Car", "0 (Extremely Unsafe)", "100 (Extremely Safe)", true)}
       ${buildSliderHTML(4, "safety_vehicle_bus", "Bus", "0 (Extremely Unsafe)", "100 (Extremely Safe)", true)}
-      ${buildSliderHTML(5, "safety_vehicle_twowheeler", "Two-wheeler", "0 (Extremely Unsafe)", "100 (Extremely Safe)", true)}
+      ${buildSliderHTML(5, "safety_vehicle_truck", "Truck", "0 (Extremely Unsafe)", "100 (Extremely Safe)", true)}
+      ${buildSliderHTML(5, "safety_vehicle_tuk-tuk", "Tuk-tuk", "0 (Extremely Unsafe)", "100 (Extremely Safe)", true)}
     </div>
 
-    <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
-      <h5 style="margin-bottom: 5px;">Ideal eHMI Display Location</h5>
-      ${buildSliderHTML(6, "location_windshield", "Front windshield", "0 (Not suitable)", "100 (Highly suitable)", false)}
-      ${buildSliderHTML(7, "location_hood", "Hood / Bonnet", "0 (Not suitable)", "100 (Highly suitable)", false)}
-      ${buildSliderHTML(8, "location_grille", "Front grille", "0 (Not suitable)", "100 (Highly suitable)", false)}
-      ${buildSliderHTML(9, "location_multiple", "Multiple locations simultaneously", "0 (Not suitable)", "100 (Highly suitable)", false)}
-    </div>
+    // <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+    //   <h5 style="margin-bottom: 5px;">Ideal eHMI Display Location</h5>
+    //   ${buildSliderHTML(6, "location_windshield", "Front windshield", "0 (Not suitable)", "100 (Highly suitable)", false)}
+    //   ${buildSliderHTML(7, "location_hood", "Hood / Bonnet", "0 (Not suitable)", "100 (Highly suitable)", false)}
+    //   ${buildSliderHTML(8, "location_grille", "Front grille", "0 (Not suitable)", "100 (Highly suitable)", false)}
+    //   ${buildSliderHTML(9, "location_multiple", "Multiple locations simultaneously", "0 (Not suitable)", "100 (Highly suitable)", false)}
+    // </div>
     `
 };
 
