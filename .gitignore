@@ -212,3 +212,6 @@ trust/*.p
 **/LightingData.asset
 **/Lightmap-*_comp_light.exr
 **/ReflectionProbe-*.exr
+
+# Claude Code local settings
+.claude/settings.local.json
