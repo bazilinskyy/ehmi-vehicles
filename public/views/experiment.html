@@ -382,7 +382,7 @@ image_ids = shuffle(image_ids);
 var instructions_block = {
     type: jsPsychInstructions,
     pages: [
-        '<div class="jumbotron jumbotron-fluid" style="text-align: left;"><div class="container"><h1 class="display-4">Introduction</h1><p class="lead">In this experiment, you will view a total of ' + n_images_per_participant + ' images of traffic. Each image will be on display for ' + trial_duration / 1000 + ' seconds, during which you are invited to observe the image freely, making sure that your eye gaze never leaves the screen. After seeing each image, you will be invited to answer some questions, presented on a scale.</p><p>The window of your browser should be at least 1300px wide and 800px tall.</p><hr><p>Press \'Next\' to start the experiment.</p></div></div>'
+        '<div class="jumbotron jumbotron-fluid" style="text-align: left;"><div class="container"><h1 class="display-4">Introduction</h1><p class="lead">In this experiment, you will view a total of ' + n_images_per_participant + ' images of traffic. Each image will be on display for ' + trial_duration / 1000 + ' seconds, during which you are invited to observe the image freely, making sure that your eye gaze never leaves the screen. After seeing each image, you will be invited to answer some questions, presented on a scale.</p><p>The window of your browser should be at least 1280px wide and 720px tall.</p><hr><p>Press \'Next\' to start the experiment.</p></div></div>'
     ],
     show_clickable_nav: true,
     data: {
@@ -820,8 +820,8 @@ var fullscreen_enter = {
 var browser_check = {
     type: jsPsychBrowserCheck,
     features: ['width', 'height', 'browser', 'browser_version', 'mobile', 'os'],
-    minimum_width: 1300,
-    minimum_height: 800,
+    minimum_width: 1280,
+    minimum_height: 720,
     inclusion_function: function(data) {
         excluded = data.mobile;
         return !data.mobile;
@@ -830,7 +830,7 @@ var browser_check = {
         excluded = true;
         return '<div class="jumbotron jumbotron-fluid" style="text-align: left;"><div class="container"><h1 class="display-4">Unable to participate</h1><p class="lead">' +
             (data.mobile ? 'This experiment cannot be completed on a phone or tablet.' : 'Your screen is too small for this experiment.') +
-            ' Please open the link on a computer with a screen of at least 1300 by 800 pixels.</p><hr><p class="lead">You may now close this tab.</p></div></div>';
+            ' Please open the link on a computer with a screen of at least 1280 by 720 pixels.</p><hr><p class="lead">You may now close this tab.</p></div></div>';
     }
 }
 
