@@ -14,6 +14,7 @@
     <script src="jspsych/plugin-survey-html-form-slider.js"></script>
     <script src="jspsych/plugin-html-slider-response.js"></script>
     <script src="jspsych/plugin-preload.js"></script>
+    <script src="jspsych/plugin-browser-check.js"></script>
     <script src="jspsych/plugin-image-keyboard-response.js"></script>
     <script src="jspsych/plugin-survey-likert.js"></script>
     <script src="jspsych/plugin-survey-multi-choice.js"></script>
@@ -250,8 +251,11 @@ if (debug) {
 /**
  * Initialise jsPsych.
  */
+var excluded = false; // set when the browser check rejects the participant
+
 var jsPsych = initJsPsych({
     on_finish: function() {
+        if (excluded) return; // keep the exclusion message on screen
         window.location = 'finish?work=' + worker_code;
     },
     on_interaction_data_update: function(data) {
@@ -263,9 +267,9 @@ var jsPsych = initJsPsych({
 });
 
 /**
- * Save data.
+ * Save data. Optional callback runs once the data is stored.
  */
-function saveData() {
+function saveData(on_saved) {
     // check if data needs to be saved
     if (save_data) {
         // add worker ID and browser interactions
@@ -288,6 +292,7 @@ function saveData() {
             })
             .done(function() {
                 jsPsych.data.reset();
+                if (on_saved) on_saved();
             })
             .fail(function() {
                 alert('A problem occurred while writing to the database. Please contact the researcher for more information.')
@@ -296,6 +301,8 @@ function saveData() {
         if (debug) {
             console.log('data saved');
         }
+    } else if (on_saved) {
+        on_saved();
     }
 }
 
@@ -754,7 +761,7 @@ var validation = {
 var recalibrate_instructions = {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: `
-        <div class="jumbotron jumbotron-fluid" style="text-align: left;"><div class="container"><h1 class="display-4">Insufficient accuracy of calibration</h1><p class="lead">The accuracy of the calibration is a lower than we would like. Let's try calibrating one more time. On the next screen, look at the dots and click on them.<hr><p>Press \'C\' to proceed.</p></div></div>
+        <div class="jumbotron jumbotron-fluid" style="text-align: left;"><div class="container"><h1 class="display-4">Insufficient accuracy of calibration</h1><p class="lead">The accuracy of the calibration is lower than we would like. Let's try calibrating one more time. On the next screen, look at the dots and click on them.<hr><p>Press \'C\' to proceed.</p></div></div>
     `,
     choices: ['C'],
 }
@@ -795,6 +802,24 @@ var fullscreen_enter = {
     fullscreen_mode: true
 }
 
+// check device and window size (run in full screen, so the window is the screen)
+var browser_check = {
+    type: jsPsychBrowserCheck,
+    features: ['width', 'height', 'browser', 'browser_version', 'mobile', 'os'],
+    minimum_width: 1300,
+    minimum_height: 800,
+    inclusion_function: function(data) {
+        excluded = data.mobile;
+        return !data.mobile;
+    },
+    exclusion_message: function(data) {
+        excluded = true;
+        return '<div class="jumbotron jumbotron-fluid" style="text-align: left;"><div class="container"><h1 class="display-4">Unable to participate</h1><p class="lead">' +
+            (data.mobile ? 'This experiment cannot be completed on a phone or tablet.' : 'Your screen is too small for this experiment.') +
+            ' Please open the link on a computer with a screen of at least 1300 by 800 pixels.</p><hr><p class="lead">You may now close this tab.</p></div></div>';
+    }
+}
+
 // exit full screen
 var fullscreen_exit = {
     type: jsPsychFullscreen,
@@ -818,6 +843,7 @@ if (debug) {
 }
 
 timeline.push(fullscreen_enter);  // enter full screen
+timeline.push(browser_check);  // device and window size check
 if (eye_tracking) {  // toggle for using eye tracking
     timeline.push(camera_instructions); 
     timeline.push(init_camera); 
@@ -864,8 +890,8 @@ for (var i = 0; i < n_images_per_participant * n_images_repeat; i++) {
                             console.log('Wrong answer for question', idx, '| total wrong:', attention_wrong_count);
                         }
                         if (attention_wrong_count >= MAX_WRONG_THRESHOLD) {
-                            saveData(); // save data
-                            window.location = 'finish_fail';
+                            // redirect only after the data is stored
+                            saveData(function() { window.location = 'finish_fail'; });
                         }
                     }
                 }
