@@ -516,7 +516,21 @@ var section1_text = {
         required: true
       }
     ],
-    preamble: "Answer these questions."
+    preamble: "Answer these questions.",
+    on_load: function() {
+        // native form validation: the browser blocks submitting until inputs are valid
+        var age = document.querySelector('input[data-name="age"]');
+        age.type = 'number';
+        age.min = 1;
+        age.max = 120;
+        age.step = 1;
+        age.title = 'Enter your age as a whole number';
+        ['education', 'occupation', 'nationality', 'country_residence'].forEach(function(name) {
+            var input = document.querySelector('input[data-name="' + name + '"]');
+            input.pattern = '.*\\p{L}.*\\p{L}.*';  // at least two letters
+            input.title = 'Please enter text (at least two letters)';
+        });
+    }
   };
 
 var section1_choice = {
