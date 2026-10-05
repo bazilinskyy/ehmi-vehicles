@@ -266,12 +266,21 @@ var jsPsych = initJsPsych({
     ]
 });
 
+var last_saved_index = -1;  // trial_index of the last row sent to the server
+
 /**
- * Save data. Optional callback runs once the data is stored.
+ * Save data. Sends only rows not sent before, so rows added while a request
+ * is in flight are neither lost nor sent twice. Optional callback runs once
+ * the data is stored.
  */
 function saveData(on_saved) {
     // check if data needs to be saved
     if (save_data) {
+        var is_new = function(row) { return row.trial_index > last_saved_index; };
+        if (jsPsych.data.get().filterCustom(is_new).count() == 0) {
+            if (on_saved) on_saved();
+            return;
+        }
         // add worker ID and browser interactions
         jsPsych.data.get().addToLast({
             worker_code: worker_code,
@@ -280,18 +289,19 @@ function saveData(on_saved) {
             window_height: $(window).height()
         });
         interactions = [];  // reset interactions
+        var new_rows = jsPsych.data.get().filterCustom(is_new);
+        last_saved_index = new_rows.last(1).values()[0].trial_index;
 
         if (debug) {
-            console.log('saving data', jsPsych.data.get().json());
+            console.log('saving data', new_rows.json());
         }
         $.ajax({
                 type: 'POST',
                 url: '/experiment-data',
-                data: jsPsych.data.get().json(),
+                data: new_rows.json(),
                 contentType: 'application/json'
             })
             .done(function() {
-                jsPsych.data.reset();
                 if (on_saved) on_saved();
             })
             .fail(function() {
