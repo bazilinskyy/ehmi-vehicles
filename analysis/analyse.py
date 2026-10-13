@@ -115,7 +115,8 @@ def tidy(runs):
                 rect = list(t['webgazer_targets'].values())[0]
                 for p in t['webgazer_data']:
                     gaze.append((code, int(t['stimulus'].split('_')[-1].split('.')[0]),
-                                 p['x'] - rect['left'], p['y'] - rect['top']))
+                                 (p['x'] - rect['left']) * W / rect['width'],
+                                 (p['y'] - rect['top']) * H / rect['height']))
     people = pd.DataFrame(people)
     answers = pd.DataFrame(answers).merge(mapping, on='image_id', how='left')
     # local-language "go" texts: Chaliye (Hindi), Lopen (Dutch)
@@ -254,18 +255,69 @@ def fig_post(post, n):
     finish(fig, 'post_questionnaire.png', n)
 
 
+def density(points, sigma):
+    """Gaze density on an 8 px grid over the stimulus, smoothed with a Gaussian of sigma bins, max 1."""
+    inside = points[(points.x >= 0) & (points.x < W) & (points.y >= 0) & (points.y < H)]
+    h, _, _ = np.histogram2d(inside.y, inside.x, bins=[H // 8, W // 8], range=[[0, H], [0, W]])
+    k = np.exp(-0.5 * (np.arange(-3 * sigma, 3 * sigma + 1) / sigma) ** 2)
+    k /= k.sum()
+    h = np.apply_along_axis(lambda r: np.convolve(r, k, 'same'), 1, h)
+    h = np.apply_along_axis(lambda c: np.convolve(c, k, 'same'), 0, h)
+    return h / h.max() if h.max() > 0 else h
+
+
+def gaze_per_stimulus(gaze):
+    """Save gaze over each stimulus as figures/gaze/image_<id>.jpg; return rows for the README table."""
+    from PIL import Image
+    folder = os.path.join(FIG, 'gaze')
+    os.makedirs(folder, exist_ok=True)
+    for old in glob.glob(os.path.join(folder, 'image_*.jpg')):
+        os.remove(old)
+    mapping = pd.read_csv(MAPPING)
+    stimuli = os.path.dirname(MAPPING)
+    orange = np.array([235, 104, 52], dtype=float)  # categorical slot 2, stands out on the gray photo
+    rows = []
+    for image_id, g in sorted(gaze.groupby('image_id'), key=lambda kv: kv[0]):
+        photo = Image.open(os.path.join(stimuli, 'image_%d.jpg' % image_id)).convert('L').resize((640, 360))
+        base = 255 - 0.6 * (255 - np.asarray(photo, dtype=float))  # lighten so the gaze reads on top
+        heat = np.asarray(Image.fromarray((density(g, 3) * 255).astype(np.uint8)).resize((640, 360),
+                                                                                       Image.BILINEAR)) / 255
+        alpha = (0.9 * heat ** 0.6)[..., None]  # lift low densities so sparse gaze stays visible
+        out = (1 - alpha) * base[..., None] + alpha * orange
+        Image.fromarray(out.astype(np.uint8)).save(os.path.join(folder, 'image_%d.jpg' % image_id), quality=80)
+        m = mapping[mapping.image_name == 'image_%d' % image_id].iloc[0]
+        ehmi = EHMI[m.ehmi][0] if m.ehmi in EHMI else 'Text local: ' + m.ehmi
+        rows.append((image_id, '%s, %s, %s, %d m' % ('India' if m.country == 'INDIA' else 'NL',
+                                                      m.vehicle.replace('_', '-'), ehmi, m.distance),
+                     g.worker_code.nunique()))
+    return rows
+
+
+def update_readme(rows, n_valid):
+    """Replace the gaze section of README.md between its markers with a table of per-stimulus heatmaps."""
+    path = os.path.join(ROOT, 'README.md')
+    start, end = '<!-- gaze-per-stimulus:start -->', '<!-- gaze-per-stimulus:end -->'
+    readme = open(path).read()
+    if start not in readme:
+        return
+    cells = ['<td width="33%%"><img src="figures/gaze/image_%d.jpg" alt="Gaze on image %d"><br>'
+             '<sub>Image %d: %s (n = %d)</sub></td>' % (i, i, i, label, n) for i, label, n in rows]
+    table = '\n'.join('<tr>%s</tr>' % ''.join(cells[i:i + 3]) for i in range(0, len(cells), 3))
+    body = ('Gaze (orange, stronger = more) over each stimulus, from the %d participant%s with valid gaze data. '
+            '%d of 136 stimuli have gaze data so far; n is the number of participants per stimulus.\n\n'
+            '<table>\n%s\n</table>' % (n_valid, '' if n_valid == 1 else 's', len(rows), table)) if rows else 'No valid gaze data yet.'
+    before, rest = readme.split(start, 1)
+    with open(path, 'w') as f:
+        f.write(before + start + '\n' + body + '\n' + end + rest.split(end, 1)[1])
+
+
 def fig_gaze(gaze, n_valid, n_all):
     fig, ax = plt.subplots(figsize=(8, 4.8))
     if len(gaze):
-        inside = gaze[(gaze.x >= 0) & (gaze.x < W) & (gaze.y >= 0) & (gaze.y < H)]
-        h, _, _ = np.histogram2d(inside.y, inside.x, bins=[H // 8, W // 8], range=[[0, H], [0, W]])
-        k = np.exp(-0.5 * (np.arange(-12, 13) / 4) ** 2)
-        k /= k.sum()
-        h = np.apply_along_axis(lambda r: np.convolve(r, k, 'same'), 1, h)
-        h = np.apply_along_axis(lambda c: np.convolve(c, k, 'same'), 0, h)
+        h = density(gaze, 4)
         cmap = matplotlib.colors.LinearSegmentedColormap.from_list(
             'seq', ['#ffffff', '#cde2fb', '#9ec5f4', '#6da7ec', '#3987e5', '#256abf', '#184f95', '#0d366b'])
-        ax.imshow(h / h.max(), extent=[0, W, H, 0], cmap=cmap, vmin=0, vmax=1, interpolation='bilinear')
+        ax.imshow(h, extent=[0, W, H, 0], cmap=cmap, vmin=0, vmax=1, interpolation='bilinear')
     ax.set_xlim(0, W)
     ax.set_ylim(H, 0)
     ax.set_xlabel('x (px)')
@@ -294,6 +346,7 @@ def main(folder):
     if len(post):
         fig_post(post, len(post))
     fig_gaze(gaze, int(people['gaze_valid'].sum()), len(people))
+    update_readme(gaze_per_stimulus(gaze), int(people['gaze_valid'].sum()))
     print('figures saved to', FIG)
 
 
