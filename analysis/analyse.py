@@ -91,6 +91,9 @@ def tidy(runs):
             'attention_wrong': sum(v not in ('4', 'For me to observe images', 'Water is wet', 'Images with traffic',
                                              'Car') for v in attention.values()),
             'gaze_samples': len(points), 'gaze_distinct': len(set(points)), 'gaze_valid': gaze_ok,
+            # camera restarts after frozen gaze; not recorded before October 2026 (NaN)
+            'gaze_camera_restarts': (sum(t['gaze_camera_restarts'] for t in images if 'gaze_camera_restarts' in t)
+                                     if any('gaze_camera_restarts' in t for t in images) else np.nan),
             **{k: responses.get(k) for k in ('age', 'gender', 'education', 'occupation', 'nationality',
                                              'country_residence', 'walking_frequency', 'vehicle_yield',
                                              'smartphone_while_crossing', 'av_awareness',
@@ -337,7 +340,7 @@ def main(folder):
     for name, df in (('participants', people), ('answers', answers), ('post_questionnaire', post)):
         df.to_csv(os.path.join(OUT, name + '.csv'), index=False)
     cols = ['worker_code', 'browser', 'images_seen', 'images_planned', 'completed', 'minutes',
-            'attention_wrong', 'gaze_valid', 'country_residence']
+            'attention_wrong', 'gaze_valid', 'gaze_camera_restarts', 'country_residence']
     print(people[cols].to_string(index=False))
     n = answers['worker_code'].nunique()
     fig_ehmi(answers, n)

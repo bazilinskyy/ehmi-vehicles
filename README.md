@@ -15,7 +15,7 @@ pip install pandas numpy matplotlib
 python analysis/analyse.py <folder with heroku_*.json>
 ```
 
-Per-participant tables (participants, answers per image, post-experiment questionnaire) are saved to `_output/` and are not in git, as they hold personal data. Figures are saved to `figures/`; the per-stimulus gaze heatmaps go to `figures/gaze/` and the script refreshes their table in this README. Ratings are averaged within each participant first, then across participants. Gaze data of a participant counts as invalid when fewer than half of the samples are distinct points (WebGazer did not track the face).
+Per-participant tables (participants, answers per image, post-experiment questionnaire) are saved to `_output/` and are not in git, as they hold personal data. Figures are saved to `figures/`; the per-stimulus gaze heatmaps go to `figures/gaze/` and the script refreshes their table in this README. Ratings are averaged within each participant first, then across participants. Gaze data of a participant counts as invalid when fewer than half of the samples are distinct points (frozen gaze). Frozen gaze occurred in Firefox and Chrome. The experiment therefore keeps the webcam video rendered during image trials and restarts the camera after 15 identical consecutive gaze samples (about 0.5 s). Each image trial stores the number of restarts in `gaze_camera_restarts`; the participant table reports their sum.
 
 ## Results
 Preliminary: N = 2 participants (data from 13 October 2026; both living in India, one stopped after 28 of 34 images). The figures are rebuilt by the analysis script as data comes in.

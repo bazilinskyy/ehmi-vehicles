@@ -266,6 +266,94 @@ var jsPsych = initJsPsych({
     ]
 });
 
+/**
+ * Frozen gaze. During image trials WebGazer is paused and each sample redraws
+ * the current frame of its <video> element. The jsPsych extension hides that
+ * element with display: none. When the browser stops delivering new frames to
+ * the element (seen in Firefox and Chrome), every sample repeats the last
+ * prediction. The video is therefore kept rendered but transparent during
+ * image trials, and the camera is restarted when samples stop changing.
+ */
+var FREEZE_SAMPLES = 15;  // identical consecutive samples (about 0.5 s at 34 ms) that count as frozen
+var gaze_watch_registered = false;  // gaze callback added to the extension
+var gaze_watch_active = false;  // true while an image trial records gaze
+var gaze_last = null;  // last gaze sample
+var gaze_repeats = 0;  // consecutive samples identical to gaze_last
+var gaze_camera_restarts = 0;  // camera restarts in the current trial
+
+// keep the webcam video rendered so the browser keeps updating its frames
+function keepVideoRendered() {
+    ['webgazerVideoContainer', 'webgazerVideoFeed'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) {
+            el.style.display = 'block';
+            el.style.opacity = '0';
+            el.style.pointerEvents = 'none';
+        }
+    });
+}
+
+// restart the video pipeline, and the camera stream if its track has ended
+function restartCamera() {
+    var video = document.getElementById('webgazerVideoFeed');
+    if (!video) return;
+    keepVideoRendered();
+    var stream = video.srcObject;
+    var track = stream ? stream.getVideoTracks()[0] : null;
+    if (track && track.readyState === 'live') {
+        video.srcObject = stream;  // reattaching the stream reloads the element
+        video.play().catch(function(err) { console.log('video play failed', err); });
+        return;
+    }
+    navigator.mediaDevices.getUserMedia(webgazer.params.camConstraints)
+        .then(function(new_stream) {
+            if (stream) stream.getTracks().forEach(function(t) { t.stop(); });
+            video.srcObject = new_stream;
+            return video.play();
+        })
+        .catch(function(err) { console.log('camera restart failed', err); });
+}
+
+// restart the camera each time FREEZE_SAMPLES identical samples arrive in a row
+function checkGazeSample(d) {
+    if (!gaze_watch_active) return;
+    if (gaze_last && d.x === gaze_last.x && d.y === gaze_last.y) {
+        gaze_repeats++;
+        if (gaze_repeats % FREEZE_SAMPLES === 0) {
+            gaze_camera_restarts++;
+            if (debug) {
+                console.log('gaze frozen, restarting camera');
+            }
+            restartCamera();
+        }
+    } else {
+        gaze_repeats = 0;
+    }
+    gaze_last = d;
+}
+
+function startGazeWatch() {
+    // extensions are initialised in jsPsych.run(), so register here
+    if (!gaze_watch_registered) {
+        jsPsych.extensions.webgazer.onGazeUpdate(checkGazeSample);
+        gaze_watch_registered = true;
+    }
+    gaze_watch_active = true;
+    gaze_last = null;
+    gaze_repeats = 0;
+    gaze_camera_restarts = 0;
+    keepVideoRendered();
+    var video = document.getElementById('webgazerVideoFeed');
+    if (video && video.paused) {
+        video.play().catch(function(err) { console.log('video play failed', err); });
+    }
+}
+
+function stopGazeWatch() {
+    gaze_watch_active = false;
+    return gaze_camera_restarts;
+}
+
 var last_saved_index = -1;  // trial_index of the last row sent to the server
 
 /**
@@ -439,7 +527,11 @@ for (var i = 0; i < n_images_per_participant * n_images_repeat; i++) {
         trial_duration: trial_duration,
         on_start: function(trial) {
             last_image_seen = trial.stimulus;
-        },  
+            if (eye_tracking) startGazeWatch();
+        },
+        on_finish: function(data) {
+            if (eye_tracking) data.gaze_camera_restarts = stopGazeWatch();
+        },
         extensions: [
           {
             type: jsPsychExtensionWebgazer, 
