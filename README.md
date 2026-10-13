@@ -8,14 +8,32 @@ The experiment runs on [jsPsych](https://www.jspsych.org) with a Node.js server 
 Run locally with `npm install` and `CONNECTION='<MongoDB connection string>' node app.js`, then open http://localhost:3000. URL parameters: `debug=true`, `save_data=false`, `eye_tracking=false`.
 
 ## Analysis
-Export the data from MongoDB to JSON (`mongoexport --collection entries --type json --out heroku_0.json`), then run:
+The analysis is in the `art` package (`art/analysis.py`, started by `art/run.py`). Tested with Python 3.11. Set up the environment in the repository folder:
 
 ```
-pip install pandas numpy matplotlib
-python analysis/analyse.py <folder with heroku_*.json>
+pip install -r requirements.txt
 ```
 
-Per-participant tables (participants, answers per image, post-experiment questionnaire) are saved to `_output/` and are not in git, as they hold personal data. Figures are saved to `figures/`; the per-stimulus gaze heatmaps go to `figures/gaze/` and the script refreshes their table in this README. Ratings are averaged within each participant first, then across participants. Gaze data of a participant counts as invalid when fewer than half of the samples are distinct points (WebGazer did not track the face).
+### Configuration
+Settings are read from `config` and secrets from `secret` in the repository folder. Both are not in git: create them from `default.config` and `default.secret`. If there is no `config`, `default.config` is used.
+
+`config`:
+* `path_data`: folder with the data exported from MongoDB.
+* `files_heroku`: data files in that folder.
+* `download_data`: export the data from MongoDB into the first of `files_heroku` before the analysis (needs `mongoexport` and `mongodb_uri` in `secret`).
+* `mapping_stimuli`: CSV file with the conditions of each stimulus.
+* `stimulus_width`, `stimulus_height`: size of the stimuli on screen in px.
+* `min_gaze_distinct`: gaze data of a participant counts as invalid when the share of distinct gaze points is lower than this (WebGazer did not track the face).
+* `update_readme`: refresh the per-stimulus gaze table in this README.
+* `logger_level`: level of the log messages shown.
+
+`secret`:
+* `mongodb_uri`: connection string of the MongoDB database, including the password.
+
+### Running
+From the repository folder run `python -m art.run`. To export the data by hand instead: `mongoexport --uri <mongodb_uri> --collection entries --type json --out heroku_0.json`.
+
+Per-participant tables (participants, answers per image, post-experiment questionnaire) are saved to `_output/` and are not in git, as they hold personal data. Figures are saved to `figures/`; the per-stimulus gaze heatmaps go to `figures/gaze/` and the run refreshes their table in this README. Ratings are averaged within each participant first, then across participants.
 
 ## Results
 Preliminary: N = 2 participants (data from 13 October 2026; both living in India, one stopped after 28 of 34 images). The figures are rebuilt by the analysis script as data comes in.

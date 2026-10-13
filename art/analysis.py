@@ -1,7 +1,5 @@
 # by Pavlo Bazilinskyy <p.bazilinskyy@tue.nl>
-"""Analyse data of the eHMI-on-vehicles study exported from MongoDB (heroku_*.json).
-
-Usage: python analysis/analyse.py <folder with heroku_*.json>
+"""Analyse data of the eHMI-on-vehicles study exported from MongoDB.
 
 Writes per-participant tables to _output/ (not in git: they hold personal data)
 and aggregate figures to figures/ (used in README.md).
@@ -9,7 +7,6 @@ and aggregate figures to figures/ (used in README.md).
 import glob
 import json
 import os
-import sys
 
 import matplotlib
 matplotlib.use('Agg')
@@ -17,12 +14,17 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MAPPING = os.path.join(ROOT, 'public', 'img', 'stimuli_masked', 'mapping.csv')
-OUT = os.path.join(ROOT, '_output')
+import art as ar  # noqa: E402
+
+logger = ar.CustomLogger(__name__)  # use custom logger
+
+ROOT = ar.settings.root_dir
+MAPPING = os.path.join(ROOT, ar.common.get_configs('mapping_stimuli'))
+OUT = ar.settings.output_dir
 FIG = os.path.join(ROOT, 'figures')
-W, H = 1280, 720  # size of stimuli on screen
-MIN_GAZE_DISTINCT = 0.5  # share of distinct gaze points below which gaze counts as frozen
+W = ar.common.get_configs('stimulus_width')  # size of stimuli on screen
+H = ar.common.get_configs('stimulus_height')
+MIN_GAZE_DISTINCT = ar.common.get_configs('min_gaze_distinct')  # share of distinct points below which gaze is frozen
 
 # questions after each image (slider-0..3), 0-100
 QUESTIONS = {
@@ -51,11 +53,11 @@ plt.rcParams.update({'font.size': 10, 'axes.edgecolor': GRID, 'axes.labelcolor':
                      'axes.spines.top': False, 'axes.spines.right': False, 'savefig.dpi': 150})
 
 
-def load(folder):
+def load(folder, files):
     """Return dict worker_code -> list of trials, merging all saved chunks of a participant."""
     runs = {}
-    for path in sorted(glob.glob(os.path.join(folder, 'heroku_*.json'))):
-        for line in open(path):
+    for name in files:
+        for line in open(os.path.join(folder, name)):
             if not line.strip():
                 continue
             data = json.loads(line)['data']
@@ -280,16 +282,16 @@ def gaze_per_stimulus(gaze):
     for image_id, g in sorted(gaze.groupby('image_id'), key=lambda kv: kv[0]):
         photo = Image.open(os.path.join(stimuli, 'image_%d.jpg' % image_id)).convert('L').resize((640, 360))
         base = 255 - 0.6 * (255 - np.asarray(photo, dtype=float))  # lighten so the gaze reads on top
-        heat = np.asarray(Image.fromarray((density(g, 3) * 255).astype(np.uint8)).resize((640, 360),
-                                                                                       Image.BILINEAR)) / 255
+        heat = Image.fromarray((density(g, 3) * 255).astype(np.uint8)).resize((640, 360), Image.BILINEAR)
+        heat = np.asarray(heat) / 255
         alpha = (0.9 * heat ** 0.6)[..., None]  # lift low densities so sparse gaze stays visible
         out = (1 - alpha) * base[..., None] + alpha * orange
         Image.fromarray(out.astype(np.uint8)).save(os.path.join(folder, 'image_%d.jpg' % image_id), quality=80)
         m = mapping[mapping.image_name == 'image_%d' % image_id].iloc[0]
         ehmi = EHMI[m.ehmi][0] if m.ehmi in EHMI else 'Text local: ' + m.ehmi
-        rows.append((image_id, '%s, %s, %s, %d m' % ('India' if m.country == 'INDIA' else 'NL',
-                                                      m.vehicle.replace('_', '-'), ehmi, m.distance),
-                     g.worker_code.nunique()))
+        country = 'India' if m.country == 'INDIA' else 'NL'
+        label = '%s, %s, %s, %d m' % (country, m.vehicle.replace('_', '-'), ehmi, m.distance)
+        rows.append((image_id, label, g.worker_code.nunique()))
     return rows
 
 
@@ -305,7 +307,9 @@ def update_readme(rows, n_valid):
     table = '\n'.join('<tr>%s</tr>' % ''.join(cells[i:i + 3]) for i in range(0, len(cells), 3))
     body = ('Gaze (orange, stronger = more) over each stimulus, from the %d participant%s with valid gaze data. '
             '%d of 136 stimuli have gaze data so far; n is the number of participants per stimulus.\n\n'
-            '<table>\n%s\n</table>' % (n_valid, '' if n_valid == 1 else 's', len(rows), table)) if rows else 'No valid gaze data yet.'
+            '<table>\n%s\n</table>' % (n_valid, '' if n_valid == 1 else 's', len(rows), table))
+    if not rows:
+        body = 'No valid gaze data yet.'
     before, rest = readme.split(start, 1)
     with open(path, 'w') as f:
         f.write(before + start + '\n' + body + '\n' + end + rest.split(end, 1)[1])
@@ -330,27 +334,25 @@ def fig_gaze(gaze, n_valid, n_all):
     plt.close(fig)
 
 
-def main(folder):
+def main(folder, files):
+    """Read the exported data, save per-participant tables and draw all figures."""
     os.makedirs(OUT, exist_ok=True)
     os.makedirs(FIG, exist_ok=True)
-    people, answers, post, gaze = tidy(load(folder))
+    people, answers, post, gaze = tidy(load(folder, files))
     for name, df in (('participants', people), ('answers', answers), ('post_questionnaire', post)):
         df.to_csv(os.path.join(OUT, name + '.csv'), index=False)
     cols = ['worker_code', 'browser', 'images_seen', 'images_planned', 'completed', 'minutes',
             'attention_wrong', 'gaze_valid', 'country_residence']
-    print(people[cols].to_string(index=False))
+    logger.info('Participants:\n{}', people[cols].to_string(index=False))
     n = answers['worker_code'].nunique()
     fig_ehmi(answers, n)
     fig_vehicle_distance(answers, n)
     fig_country(answers, n)
     if len(post):
         fig_post(post, len(post))
-    fig_gaze(gaze, int(people['gaze_valid'].sum()), len(people))
-    update_readme(gaze_per_stimulus(gaze), int(people['gaze_valid'].sum()))
-    print('figures saved to', FIG)
-
-
-if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        sys.exit(__doc__)
-    main(sys.argv[1])
+    n_valid = int(people['gaze_valid'].sum())
+    fig_gaze(gaze, n_valid, len(people))
+    rows = gaze_per_stimulus(gaze)
+    if ar.common.get_configs('update_readme'):
+        update_readme(rows, n_valid)
+    logger.info('Saved tables to {} and figures to {}.', OUT, FIG)

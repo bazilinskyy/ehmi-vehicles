@@ -2,9 +2,7 @@
 from typing import Dict
 import os
 import json
-import pickle
 import sys
-import numpy as np
 
 import art as ar
 
@@ -71,59 +69,3 @@ def check_config(config_file_name: str = 'config', config_default_file_name: str
         return False
     else:
         return True
-
-
-def search_dict(dictionary, search_for, nested=False):
-    """
-    Search if dictionary value contains certain string search_for. If
-    nested=True multiple levels are traversed.
-    """
-    for k in dictionary:
-        if nested:
-            for v in dictionary[k]:
-                if search_for in v:
-                    return k
-                elif v in search_for:
-                    return k
-        else:
-            if search_for in dictionary[k]:
-                return k
-            elif dictionary[k] in search_for:
-                return k
-    return None
-
-
-def save_to_p(file, data, desription_data='data'):
-    """
-    Save data to a pickle file.
-    """
-    path = os.path.join(os.path.join(ar.settings.root_dir, 'art'), file)
-    with open(path, 'wb') as f:
-        pickle.dump(data, f)
-    logger.info('Saved ' + desription_data + ' to pickle file {}.', file)
-
-
-def load_from_p(file, desription_data='data'):
-    """
-    Load data from a pickle file.
-    """
-    path = os.path.join(os.path.join(ar.settings.root_dir, 'art'), file)
-    with open(path, 'rb') as f:
-        data = pickle.load(f)
-    logger.info('Loaded ' + desription_data + ' from pickle file {}.', file)
-    return data
-
-
-def vertical_sum(data):
-    """Calculate vertical sum of lists in list.
-
-    Args:
-        data (list of lists): data
-
-    Returns:
-        list: sum of lists in list.
-    """
-    # convert each sublist (a list of lists) into a NumPy array and sum vertically (axis=0)
-    result = np.sum([np.array(sublist) for sublist in data], axis=0)
-    # convert the result back to a list
-    return result.tolist()
