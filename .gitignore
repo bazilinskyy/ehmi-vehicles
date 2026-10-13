@@ -215,3 +215,6 @@ trust/*.p
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# per-participant analysis output (personal data)
+_output/
