@@ -10,7 +10,7 @@ The experiment is built with [jsPsych](https://www.jspsych.org) 8 in `public/vie
 ### Procedure
 1. Images are preloaded and the browser switches to full screen.
 2. Device check: phones, tablets and screens smaller than 1280 × 720 px cannot continue.
-3. Webcam setup, calibration of the eye tracker (5 points, each clicked twice) and a check of its accuracy; calibration is repeated once if the accuracy is too low. Participants are asked to use Google Chrome, as eye tracking may not work in other browsers.
+3. Webcam setup, calibration of the eye tracker (5 points, each clicked twice) and a check of its accuracy; calibration is repeated once if the accuracy is too low. Participants are asked to use Google Chrome, as eye tracking works best there.
 4. Instructions, demographics (age, education, occupation, nationality, country of residence, gender, walking and crossing habits) and questions on automated vehicles.
 5. An introduction to eHMIs.
 6. 34 of the 136 stimuli, in random order. Each trial: press C, view the photo for 5 s, answer the 4 slider questions. Five attention checks are mixed in between the trials; three wrong answers end the study.
