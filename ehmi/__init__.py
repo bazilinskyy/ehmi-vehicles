@@ -13,7 +13,7 @@ class CustomLogger:
     Examples
     --------
     >>> CustomLogger(__name__)
-    <gazes.CustomLogger object at 0x00000AB32390>
+    <ehmi.CustomLogger object at 0x00000AB32390>
     """
 
     def __init__(self, name):

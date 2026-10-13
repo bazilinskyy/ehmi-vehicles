@@ -1,7 +1,7 @@
 {
-  "name": "art-crowdsourced",
+  "name": "ehmi-vehicles",
   "version": "0.1",
-  "description": "Crowdsourced experiment on comprehension of art.",
+  "description": "Online experiment on eHMIs on vehicles in India and the Netherlands.",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bazilinskyy/art-crowdsourced.git"
+    "url": "git+https://github.com/bazilinskyy/ehmi-vehicles.git"
   },
   "author": "Pavlo Bazilinskyy",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/bazilinskyy/art-crowdsourced/issues"
+    "url": "https://github.com/bazilinskyy/ehmi-vehicles/issues"
   },
-  "homepage": "https://github.com/bazilinskyy/art-crowdsourced",
+  "homepage": "https://github.com/bazilinskyy/ehmi-vehicles",
   "dependencies": {
     "body-parser": "^1.15.2",
     "ejs": "^3.1.8",
