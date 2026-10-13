@@ -3,19 +3,19 @@
 import os
 import subprocess
 
-import art as ar
+import ehmi as eh
 
-ar.logs(show_level=ar.common.get_configs('logger_level'), show_color=True)
-logger = ar.CustomLogger(__name__)  # use custom logger
+eh.logs(show_level=eh.common.get_configs('logger_level'), show_color=True)
+logger = eh.CustomLogger(__name__)  # use custom logger
 
 
 if __name__ == '__main__':
-    path_data = ar.common.get_configs('path_data')
-    files_heroku = ar.common.get_configs('files_heroku')
-    if ar.common.get_configs('download_data'):
+    path_data = eh.common.get_configs('path_data')
+    files_heroku = eh.common.get_configs('files_heroku')
+    if eh.common.get_configs('download_data'):
         # export the collection into the first data file; the connection string stays in the secret file
         out = os.path.join(path_data, files_heroku[0])
         logger.info('Exporting data from MongoDB to {}.', out)
-        subprocess.run(['mongoexport', '--uri', ar.common.get_secrets('mongodb_uri'), '--collection', 'entries',
+        subprocess.run(['mongoexport', '--uri', eh.common.get_secrets('mongodb_uri'), '--collection', 'entries',
                         '--type', 'json', '--out', out], check=True)
-    ar.analysis.main(path_data, files_heroku)
+    eh.analysis.main(path_data, files_heroku)

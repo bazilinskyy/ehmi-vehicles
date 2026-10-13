@@ -8,7 +8,7 @@ The experiment runs on [jsPsych](https://www.jspsych.org) with a Node.js server 
 Run locally with `npm install` and `CONNECTION='<MongoDB connection string>' node app.js`, then open http://localhost:3000. URL parameters: `debug=true`, `save_data=false`, `eye_tracking=false`.
 
 ## Analysis
-The analysis is in the `art` package (`art/analysis.py`, started by `art/run.py`). Tested with Python 3.11. Set up the environment in the repository folder:
+The analysis is in the `ehmi` package (`ehmi/analysis.py`, started by `ehmi/run.py`). Tested with Python 3.11. Set up the environment in the repository folder:
 
 ```
 pip install -r requirements.txt
@@ -31,7 +31,7 @@ Settings are read from `config` and secrets from `secret` in the repository fold
 * `mongodb_uri`: connection string of the MongoDB database, including the password.
 
 ### Running
-From the repository folder run `python -m art.run`. To export the data by hand instead: `mongoexport --uri <mongodb_uri> --collection entries --type json --out heroku_0.json`.
+From the repository folder run `python -m ehmi.run`. To export the data by hand instead: `mongoexport --uri <mongodb_uri> --collection entries --type json --out heroku_0.json`.
 
 Per-participant tables (participants, answers per image, post-experiment questionnaire) are saved to `_output/` and are not in git, as they hold personal data. Figures are saved to `figures/`; the per-stimulus gaze heatmaps go to `figures/gaze/` and the run refreshes their table in this README. Ratings are averaged within each participant first, then across participants.
 

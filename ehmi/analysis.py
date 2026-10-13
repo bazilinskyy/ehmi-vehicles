@@ -14,17 +14,17 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
-import art as ar  # noqa: E402
+import ehmi as eh  # noqa: E402
 
-logger = ar.CustomLogger(__name__)  # use custom logger
+logger = eh.CustomLogger(__name__)  # use custom logger
 
-ROOT = ar.settings.root_dir
-MAPPING = os.path.join(ROOT, ar.common.get_configs('mapping_stimuli'))
-OUT = ar.settings.output_dir
+ROOT = eh.settings.root_dir
+MAPPING = os.path.join(ROOT, eh.common.get_configs('mapping_stimuli'))
+OUT = eh.settings.output_dir
 FIG = os.path.join(ROOT, 'figures')
-W = ar.common.get_configs('stimulus_width')  # size of stimuli on screen
-H = ar.common.get_configs('stimulus_height')
-MIN_GAZE_DISTINCT = ar.common.get_configs('min_gaze_distinct')  # share of distinct points below which gaze is frozen
+W = eh.common.get_configs('stimulus_width')  # size of stimuli on screen
+H = eh.common.get_configs('stimulus_height')
+MIN_GAZE_DISTINCT = eh.common.get_configs('min_gaze_distinct')  # share of distinct points below which gaze is frozen
 
 # questions after each image (slider-0..3), 0-100
 QUESTIONS = {
@@ -353,6 +353,6 @@ def main(folder, files):
     n_valid = int(people['gaze_valid'].sum())
     fig_gaze(gaze, n_valid, len(people))
     rows = gaze_per_stimulus(gaze)
-    if ar.common.get_configs('update_readme'):
+    if eh.common.get_configs('update_readme'):
         update_readme(rows, n_valid)
     logger.info('Saved tables to {} and figures to {}.', OUT, FIG)

@@ -4,16 +4,16 @@ import os
 import json
 import sys
 
-import art as ar
+import ehmi as eh
 
-logger = ar.CustomLogger(__name__)  # use custom logger
+logger = eh.CustomLogger(__name__)  # use custom logger
 
 
 def get_secrets(entry_name: str, secret_file_name: str = 'secret') -> Dict[str, str]:
     """
     Open the secrets file and return the requested entry.
     """
-    with open(os.path.join(ar.settings.root_dir, secret_file_name)) as f:
+    with open(os.path.join(eh.settings.root_dir, secret_file_name)) as f:
         return json.load(f)[entry_name]
 
 
@@ -23,13 +23,13 @@ def get_configs(entry_name: str, config_file_name: str = 'config', config_defaul
     If no config file is found, open default.config.
     """
     # check if config file is updated
-    if not ar.common.check_config():
+    if not eh.common.check_config():
         sys.exit()
     try:
-        with open(os.path.join(ar.settings.root_dir, config_file_name)) as f:
+        with open(os.path.join(eh.settings.root_dir, config_file_name)) as f:
             content = json.load(f)
     except FileNotFoundError:
-        with open(os.path.join(ar.settings.root_dir, config_default_file_name)) as f:
+        with open(os.path.join(eh.settings.root_dir, config_default_file_name)) as f:
             content = json.load(f)
     return content[entry_name]
 
@@ -40,7 +40,7 @@ def check_config(config_file_name: str = 'config', config_default_file_name: str
     """
     # load config file
     try:
-        with open(os.path.join(ar.settings.root_dir, config_file_name)) as f:
+        with open(os.path.join(eh.settings.root_dir, config_file_name)) as f:
             config = json.load(f)
     except FileNotFoundError:
         logger.error('Config file {} not found.', config_file_name)
@@ -50,7 +50,7 @@ def check_config(config_file_name: str = 'config', config_default_file_name: str
         return False
     # load default.config file
     try:
-        with open(os.path.join(ar.settings.root_dir,
+        with open(os.path.join(eh.settings.root_dir,
                                config_default_file_name)) as f:
             default = json.load(f)
     except FileNotFoundError:
