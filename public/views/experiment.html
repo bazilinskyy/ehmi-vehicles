@@ -874,7 +874,24 @@ var validation = {
     validation_duration: 2000,
     data: {
         task: 'validate'
+    },
+    on_finish: function(data) {
+        data.gaze_frozen = gazeFrozen(data.raw_gaze);
+        if (data.gaze_frozen) {
+            if (debug) {
+                console.log('gaze frozen during validation, restarting camera');
+            }
+            restartCamera();
+        }
     }
+}
+
+// gaze counts as frozen when fewer than half of the validation samples have a
+// distinct position (same rule as min_gaze_distinct in the analysis)
+function gazeFrozen(raw_gaze) {
+    var samples = [].concat.apply([], raw_gaze);
+    var distinct = new Set(samples.map(function(p) { return p.x + ',' + p.y; }));
+    return samples.length === 0 || distinct.size < 0.5 * samples.length;
 }
 
 var recalibrate_instructions = {
@@ -889,6 +906,7 @@ var recalibrate = {
     timeline: [recalibrate_instructions, calibration, validation_instructions, validation],
     conditional_function: function(){
         var validation_data = jsPsych.data.get().filter({task: 'validate'}).values()[0];
+        if (validation_data.gaze_frozen) return true;
         return validation_data.percent_in_roi.some(function(x){
             var minimum_percent_acceptable = 50;
             return x < minimum_percent_acceptable;
