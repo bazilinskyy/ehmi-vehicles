@@ -749,7 +749,7 @@ var preference_trial_part1 = {
       <p style="color: #555;">Rate how much you prefer each type (0 = Not preferred, 100 = Strongly preferred):</p>
       ${buildSliderHTML(1, "ehmi_safe_no_ehmi", "No eHMI", "0 (Not preferred)", "100 (Strongly preferred)", false)}
       ${buildSliderHTML(2, "ehmi_safe_text_en", "Text display (English)", "0 (Not preferred)", "100 (Strongly preferred)", false)}
-      ${buildSliderHTML(3, "ehmi_safe_light", "Light signal (color-based)", "0 (Not preferred)", "100 (Strongly preferred)", false)}
+      ${buildSliderHTML(3, "ehmi_safe_light", "Light bands (Colored LED strips)", "0 (Not preferred)", "100 (Strongly preferred)", false)}
       ${buildSliderHTML(4, "ehmi_safe_symbol", "Symbol / Icon", "0 (Not preferred)", "100 (Strongly preferred)", false)}
       ${buildSliderHTML(5, "ehmi_safe_regional_text", "Regional language text", "0 (Not preferred)", "100 (Strongly preferred)", false)}
     </div>
@@ -759,7 +759,7 @@ var preference_trial_part1 = {
       <p style="color: #555;">Rate <strong>overall helpfulness </strong> of eHMI (0 = Not helpful, 100 = Extremely helpful):</p>
       ${buildSliderHTML(6, "helpful_text", "Text", "0 (Not helpful)", "100 (Extremely helpful)", false)}
       ${buildSliderHTML(7, "helpful_symbols", "Symbols / Icons", "0 (Not helpful)", "100 (Extremely helpful)", false)}
-      ${buildSliderHTML(8, "helpful_lights", "Lights", "0 (Not helpful)", "100 (Extremely helpful)", false)}
+      ${buildSliderHTML(8, "helpful_lights", "Light bands (Colored LED strips)", "0 (Not helpful)", "100 (Extremely helpful)", false)}
       ${buildSliderHTML(9, "helpful_combination", "Combination of two or more", "0 (Not helpful)", "100 (Extremely helpful)", false)}
   </div>
     `
@@ -781,9 +781,9 @@ var preference_trial_part2 = {
     <!-- Combination Pairs Preferences -->
     <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
       <h5 style="margin-bottom: 5px;">Rate how much you <strong>prefer the following eHMI combinations </strong></h5>
-      ${buildSliderHTML(0, "combo_pref_text_light", "Text + Light", "0 (Not preferred)", "100 (Strongly preferred)", false)}
+      ${buildSliderHTML(0, "combo_pref_text_light", "Text + Light bands (Colored LED strips)", "0 (Not preferred)", "100 (Strongly preferred)", false)}
       ${buildSliderHTML(1, "combo_pref_text_symbol", "Text + Symbol", "0 (Not preferred)", "100 (Strongly preferred)", false)}
-      ${buildSliderHTML(2, "combo_pref_light_symbol", "Light + Symbol", "0 (Not preferred)", "100 (Strongly preferred)", false)}
+      ${buildSliderHTML(2, "combo_pref_light_symbol", "Light bands (Colored LED strips) + Symbol", "0 (Not preferred)", "100 (Strongly preferred)", false)}
     </div>
 
     <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
