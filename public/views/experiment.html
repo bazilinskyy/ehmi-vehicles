@@ -519,7 +519,7 @@ for (var i = 0; i < n_images_per_participant * n_images_repeat; i++) {
     images_preload.push(full_stim_path);
     image_stimuli.push({
         type: jsPsychImageKeyboardResponse,
-        // stimulus_width: 1280,
+        stimulus_width: 1280,  // set, so the canvas has its size before the image loads (eye-tracking target)
         stimulus_height: 720,
         choices: "NO_KEYS",
         stimulus: full_stim_path,
