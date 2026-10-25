@@ -117,7 +117,12 @@ def tidy(runs):
                             **{q: float(r['slider-%d' % i]) for i, q in enumerate(QUESTIONS)}})
         if gaze_ok:
             for t in images:
-                rect = list(t['webgazer_targets'].values())[0]
+                rect = dict(list(t['webgazer_targets'].values())[0])
+                if rect['width'] == 0:
+                    # canvas measured before the image loaded: only its height was set; it then grew
+                    # to the stimulus aspect ratio around the same centre
+                    rect['width'] = rect['height'] * W / H
+                    rect['left'] -= rect['width'] / 2
                 for p in t['webgazer_data']:
                     gaze.append((code, int(t['stimulus'].split('_')[-1].split('.')[0]),
                                  (p['x'] - rect['left']) * W / rect['width'],
