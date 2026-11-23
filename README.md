@@ -8,7 +8,7 @@ Participants view photos of a car, bus, truck or tuk-tuk at 10 or 20 m, taken in
 The experiment is built with [jsPsych](https://www.jspsych.org) 8 in `public/views/experiment.html`. A Node.js server (`app.js`, Express and Mongoose) serves it and stores the data in the `entries` collection of a MongoDB database.
 
 ### Procedure
-1. Information and consent (study by IIT Roorkee in collaboration with TU/e; contact kv_krishna@ce.iitr.ac.in). Participants who do not agree, or do not confirm that they read and understood the information, end the study before anything is loaded or saved; the answers are stored as `consent` and `consent_understood`.
+1. Information and consent (study by IIT Roorkee; contact kv_krishna@ce.iitr.ac.in). Participants who do not agree, or do not confirm that they read and understood the information, end the study before anything is loaded or saved; the answers are stored as `consent` and `consent_understood`.
 2. Images are preloaded and the browser switches to full screen.
 3. Device check: phones, tablets and screens smaller than 1280 × 720 px cannot continue.
 4. Webcam setup, calibration of the eye tracker (5 points, each clicked twice) and a check of its accuracy; calibration is repeated once if the accuracy is too low or the gaze is frozen (most gaze points at the same position; the camera is then restarted first). Participants are asked to use Google Chrome, as eye tracking works best there.
