@@ -963,8 +963,64 @@ var fullscreen_exit = {
     fullscreen_mode: false
 }
 
+// informed consent: first step, before anything is loaded, the camera starts or data is saved
+var consent_text =
+    '<div style="text-align: left; max-width: 900px; margin: 0 auto;">' +
+    '<h1 class="display-5">Information and consent</h1>' +
+    '<p>You are invited to take part in a research study on how pedestrians understand messages shown on the outside of vehicles (external human-machine interfaces, eHMIs). ' +
+    'The purpose of the study is to learn how people in different countries read such messages on cars, buses, trucks and auto-rickshaws (tuk-tuks), and whether this differs between vehicle types and countries. ' +
+    'The study is conducted by Vamshi Krishna, Department of Civil Engineering, Indian Institute of Technology Roorkee (IIT Roorkee), India, in collaboration with Eindhoven University of Technology, the Netherlands. ' +
+    'If you have any questions about the study, you may contact the investigator at <a href="mailto:kv_krishna@ce.iitr.ac.in">kv_krishna@ce.iitr.ac.in</a>.</p>' +
+    '<p>Please use the Google Chrome browser on a computer (not a phone or tablet) with a webcam.</p>' +
+    '<p>To take part you must be at least 18 years old. Taking part involves no physical, legal or economic risks. ' +
+    'Participation is voluntary: the decision to take part is up to you. Please read the following information, so that you know what the study is about, what we expect from you and how we handle your personal data.</p>' +
+    '<p>In this study you will see ' + n_images_per_participant + ' photos of vehicles in traffic and answer a few questions after each photo, followed by questions about yourself and about eHMIs. The study takes about 30 minutes. ' +
+    'Before it starts, the photos are loaded, which may take a few minutes depending on your internet connection. ' +
+    'Your webcam is used to estimate where on the screen you are looking (eye tracking). This happens in your browser: no video or photos of you are recorded or saved, only the estimated positions on the screen. ' +
+    'You may stop at any moment by closing this page, without giving a reason. Answers given up to that moment are kept. If you do not want to take part, please close this page.</p>' +
+    '<p>We process the following personal data: age, gender, education, occupation, nationality, country of residence, how often you walk and cross roads, your opinions about automated vehicles and eHMIs, your answers to the questions, the estimated positions of your gaze on the screen and technical details of your browser and screen. ' +
+    'We do not ask for your name or contact details. The legal basis for processing these data is your consent. We will do everything we can to protect your privacy. ' +
+    'Published results will not contain any information through which anyone can recognise you. The data are stored in a secure, password-protected database for 10 years. ' +
+    'The anonymous data may be shared with other researchers and published with the results of the study.</p>' +
+    '<p>You have the right to request access to, correction or deletion of your data. Please send such requests, and any questions about the handling of your personal data, to the investigator at the address above.</p>' +
+    '<p>By answering "Yes" to the first question below, you confirm that:</p>' +
+    '<ol>' +
+    '<li>I have read and understood the information above, and I know whom to contact with questions.</li>' +
+    '<li>I take part voluntarily. I can stop at any moment without giving a reason, and I do not have to answer a question if I do not want to.</li>' +
+    '<li>I consent to the processing of my data as described above.</li>' +
+    '</ol></div>';
+
+var consent = {
+    type: jsPsychSurveyMultiChoice,
+    preamble: consent_text,
+    questions: [
+        {
+            prompt: 'Do you consent to take part in this study in the way described above?',
+            name: 'consent',
+            options: ['Yes', 'No'],
+            required: true
+        },
+        {
+            prompt: 'Have you read and understood the information above?',
+            name: 'consent_understood',
+            options: ['Yes', 'No'],
+            required: true
+        }
+    ],
+    button_label: 'Continue',
+    on_finish: function(data) {
+        if (data.response.consent !== 'Yes' || data.response.consent_understood !== 'Yes') {
+            excluded = true;  // keep the message on screen; nothing has been saved
+            jsPsych.abortExperiment('<div class="jumbotron jumbotron-fluid" style="text-align: left;"><div class="container"><h1 class="display-4">Thank you</h1>' +
+                '<p class="lead">You can only take part after agreeing to the information above and confirming that you have read and understood it. No data have been saved.</p>' +
+                '<hr><p class="lead">You may now close this tab.</p></div></div>');
+        }
+    }
+};
+
 // create experiment timeline array
 var timeline = [];
+timeline.push(consent);  // informed consent
 
 /* preload images */
 var preload = {
