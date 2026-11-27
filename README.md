@@ -2,28 +2,28 @@
 
 Online study of how pedestrians in India and the Netherlands read external human-machine interfaces (eHMIs) on vehicles. A collaboration of TU/e and IIT Indore.
 
-Participants view photos of a car, bus, truck or tuk-tuk at 10 or 20 m, taken in India and in the Netherlands, with no eHMI or with one of these eHMIs: English text (WALK / STOP), text in the local language (Chaliye / Rukiye in Hindi, Lopen in Dutch), a green or red symbol, or a green or red light bar. After each photo they rate on 0-100 sliders whether they would cross, how safe they feel, how clear the message is and how quickly they understand what the vehicle intends to do. Eye gaze is recorded with the webcam (WebGazer).
+Participants view photos of a car, bus, truck or tuk-tuk at 10 or 20 m, taken in India and in the Netherlands, with no eHMI or with one of these eHMIs: English text (WALK / STOP), text in the local language (Chaliye / Rukiye in Hindi, Lopen in Dutch), a green or red symbol, or a green or red light bar. After each photo, they rate on 0-100 sliders whether they would cross, how safe they feel, how clear the message is and how quickly they understand what the vehicle intends to do. Eye gaze is recorded with the webcam (WebGazer).
 
 ## Experiment
-The experiment is built with [jsPsych](https://www.jspsych.org) 8 in `public/views/experiment.html`. A Node.js server (`app.js`, Express and Mongoose) serves it and stores the data in the `entries` collection of a MongoDB database.
+The experiment is built with [jsPsych](https://www.jspsych.org) 8 and hosted at `public/views/experiment.html`. A Node.js server (`app.js`, Express and Mongoose) serves it and stores the data in the `entries` collection of a MongoDB database.
 
 ### Procedure
-1. Information and consent (study by IIT Roorkee; contact kv_krishna@ce.iitr.ac.in). Participants who do not agree, or do not confirm that they read and understood the information, end the study before anything is loaded or saved; the answers are stored as `consent` and `consent_understood`.
-2. Images are preloaded and the browser switches to full screen.
+1. Information and consent (study by IIT Indore; contact vamshikrishnakudurupaka@gmail.com). Participants who do not agree or do not confirm that they have read and understood the information end the study before anything is loaded or saved; their answers are stored as `consent` and `consent_understood`.
+2. Images are preloaded, and the browser switches to full screen.
 3. Device check: phones, tablets and screens smaller than 1280 × 720 px cannot continue.
 4. Webcam setup, calibration of the eye tracker (5 points, each clicked twice) and a check of its accuracy; calibration is repeated once if the accuracy is too low or the gaze is frozen (most gaze points at the same position; the camera is then restarted first). Participants are asked to use Google Chrome, as eye tracking works best there.
 5. Instructions, demographics (age, education, occupation, nationality, country of residence, gender, walking and crossing habits) and questions on automated vehicles.
 6. An introduction to eHMIs.
-7. 34 of the 136 stimuli, in random order. Each trial: press C, view the photo for 5 s, answer the 4 slider questions. Five attention checks are mixed in between the trials; three wrong answers end the study.
+7. 34 of the 136 stimuli, in random order. Each trial: press C, view the photo for 5 s, answer the 4 slider questions. Five attention checks are interspersed between trials; three incorrect answers end the study.
 8. Post-experiment questionnaire on two pages of sliders (trust, preferred eHMI types and combinations, perceived safety per vehicle type, display location) and an open question on improvements.
 
 Data is saved after calibration and after every trial, so the answers of participants who stop early are kept.
 
 ### Stimuli
-The 136 photos are in `public/img/stimuli_masked/`, with their conditions (country, vehicle, eHMI, distance) in `public/img/stimuli_masked/mapping.csv`. Number plates were masked with `public/img/mask_plates.py` and `mask_plates_interactive.py` and the photos resized to 1280 × 720 px, the size they are shown at. The number of photos per participant is `n_images_per_participant` in `experiment.html`.
+The 136 photos are in `public/img/stimuli_masked/`, with their conditions (country, vehicle, eHMI, distance) in `public/img/stimuli_masked/mapping.csv`. Number plates were masked using `public/img/mask_plates.py` and `mask_plates_interactive.py`, and the photos were resized to 1280 × 720 px, the size at which they are shown. The number of photos per participant is `n_images_per_participant` in `experiment.html`.
 
 ### Running the experiment
-Install the dependencies with `npm install` and start the server with `CONNECTION='<MongoDB connection string>' npm start`, then open http://localhost:3000. The server needs a reachable MongoDB database; it stops about 30 s after start if it cannot connect. URL parameters:
+Install the dependencies with `npm install` and start the server with `CONNECTION='<MongoDB connection string>' npm start`, then open http://localhost:3000. The server needs a reachable MongoDB database; it stops about 30 s after starting if it cannot connect. URL parameters:
 * `debug=true`: log details to the browser console.
 * `save_data=false`: do not send data to the database.
 * `eye_tracking=false`: skip the webcam and eye tracking.
@@ -40,7 +40,7 @@ pip install -r requirements.txt
 ```
 
 ### Configuration
-Settings are read from `config` and secrets from `secret` in the repository folder. Both are not in git: create them from `default.config` and `default.secret`. If there is no `config`, `default.config` is used.
+Settings are read from `config` and secrets from `secret` in the repository folder. Neither is in git: create them from `default.config` and `default.secret`. If there is no `config`, `default.config` is used.
 
 `config`:
 * `path_data`: folder with the data exported from MongoDB.
@@ -56,9 +56,9 @@ Settings are read from `config` and secrets from `secret` in the repository fold
 * `mongodb_uri`: connection string of the MongoDB database, including the password.
 
 ### Running the analysis
-From the repository folder run `python -m ehmi.run`. To export the data by hand instead: `mongoexport --uri <mongodb_uri> --collection entries --type json --out heroku_0.json`.
+From the repository folder, run `python -m ehmi.run`. To export the data by hand instead: `mongoexport --uri <mongodb_uri> --collection entries --type json --out heroku_0.json`.
 
-Per-participant tables (participants, answers per image, post-experiment questionnaire) are saved to `_output/` and are not in git, as they hold personal data. Figures are saved to `figures/`; the per-stimulus gaze heatmaps go to `figures/gaze/` and the run refreshes their table in this README. Ratings are averaged within each participant first, then across participants.
+Per-participant tables (participants, answers per image, post-experiment questionnaire) are saved to `_output/` and are not in git because they contain personal data. Figures are saved to `figures/`; the per-stimulus gaze heatmaps go to `figures/gaze/` and the run refreshes their table in this README. Ratings are averaged within each participant first, then across participants.
 
 Frozen gaze (the same gaze point repeated) occurred in Firefox and Chrome. The experiment therefore keeps the webcam video rendered during image trials and restarts the camera after 15 identical consecutive gaze samples (about 0.5 s). Each image trial stores the number of restarts in `gaze_camera_restarts`; the participant table reports their sum.
 
