@@ -132,9 +132,22 @@ def tidy(runs):
     # local-language "go" texts: Chaliye (Hindi), Lopen (Dutch)
     answers['ehmi_group'] = answers['ehmi'].replace({'Chaliye': 'LocalGo', 'Lopen': 'LocalGo'})
     answers = answers.merge(people[['worker_code', 'country_residence']], on='worker_code')
-    answers['residence'] = answers['country_residence'].fillna('Unknown').str.strip().str.title()
+    # free-text country of residence: group spellings of India and the Netherlands, the rest as Other
+    answers['residence'] = answers['country_residence'].map(residence_group)
     gaze = pd.DataFrame(gaze, columns=['worker_code', 'image_id', 'x', 'y'])
     return people, answers, pd.DataFrame(post), gaze
+
+
+def residence_group(text):
+    """Group a free-text country of residence into India, Netherlands, Other or Unknown."""
+    t = str(text).strip().lower().replace('the ', '') if isinstance(text, str) and text.strip() else ''
+    if not t:
+        return 'Unknown'
+    if t in ('india', 'indian', 'bharat'):
+        return 'India'
+    if t in ('netherlands', 'nederland', 'holland', 'nl', 'dutch'):
+        return 'Netherlands'
+    return 'Other'
 
 
 def mean_ci(per_participant):
@@ -212,7 +225,7 @@ def fig_vehicle_distance(answers, n):
 
 def fig_country(answers, n):
     s = condition_means(answers, ['country', 'residence'])
-    groups = sorted(s['residence'].unique())[:3]  # three colours validate all-pairs; fold the rest if needed
+    groups = [g for g in ('India', 'Netherlands', 'Other') if g in set(s['residence'])]  # three colours
     fig, axes = plt.subplots(1, 4, figsize=(14, 2.4), sharey=True)
     for ax, q in zip(axes, QUESTIONS):
         for j, (grp, color) in enumerate(zip(groups, (GO, STOP, THIRD))):
